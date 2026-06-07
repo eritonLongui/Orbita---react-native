@@ -3,6 +3,9 @@
 # dependencies
 node_modules/
 
+# Tamagui (gerado localmente)
+.tamagui/
+
 # Expo
 .expo/
 dist/
@@ -30,8 +33,14 @@ yarn-error.*
 .DS_Store
 *.pem
 
-# local env files
+# local env (opcional — app usa publicEnv.ts sem .env)
+.env
+.env.keys
 .env*.local
+
+# Firebase secrets
+firebase/service-account.json
+firebase-debug.log
 
 # typescript
 *.tsbuildinfo
