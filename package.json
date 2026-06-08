@@ -2,6 +2,9 @@
   "name": "orbita",
   "version": "1.0.0",
   "main": "index.ts",
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
     "@expo/metro-runtime": "~56.0.13",
     "@react-native-async-storage/async-storage": "^3.1.1",
@@ -48,9 +51,15 @@
   },
   "devDependencies": {
     "@types/react": "~19.2.2",
+    "eas-cli": "^16.28.0",
     "typescript": "~6.0.3"
   },
   "scripts": {
+    "setup": "bash scripts/setup.sh",
+    "setup:ios": "bash scripts/setup.sh --ios",
+    "setup:android": "bash scripts/setup.sh --android",
+    "setup:all": "bash scripts/setup.sh --all",
+    "setup:check": "bash scripts/setup.sh --check-only",
     "start": "expo start",
     "android": "expo run:android",
     "ios": "bash scripts/run-ios.sh",
@@ -59,6 +68,13 @@
     "web": "expo start --web",
     "deploy:supabase": "bash scripts/deploy-supabase.sh",
     "validate:supabase": "bash scripts/validate-supabase.sh",
+    "auth:fingerprints": "bash scripts/print-signing-fingerprints.sh",
+    "eas:credentials:android": "eas credentials -p android",
+    "eas:credentials:ios": "eas credentials -p ios",
+    "build:preview:android": "eas build --platform android --profile preview",
+    "build:preview:ios": "eas build --platform ios --profile preview",
+    "build:preview:ios-simulator": "eas build --platform ios --profile preview-simulator",
+    "build:preview": "bash scripts/deploy-mobile-preview.sh all",
     "reset:native": "rm -rf ios android && expo prebuild --clean",
     "start:clean": "expo start --clear"
   },

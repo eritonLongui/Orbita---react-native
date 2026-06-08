@@ -1,5 +1,7 @@
 # Variáveis de ambiente
 
+> **Comece pelo [README.md](../README.md)** — setup automático (`npm run setup`) e três caminhos (testar APK, dev local, deploy).
+
 ## Quem só roda ou builda o app (professor, colega, testador)
 
 **Não precisa de `.env`.**
@@ -14,6 +16,8 @@ npm run ios            # dev build no simulador/dispositivo
 ```
 
 A Lyra chama o Supabase na nuvem — a `OPENAI_API_KEY` **não** vai no celular.
+
+**Login Google com erro `DEVELOPER_ERROR`?** Veja [GOOGLE_LOGIN.md](./GOOGLE_LOGIN.md) — cada máquina Android precisa do SHA-1 no Firebase (não é assinatura do Git).
 
 ---
 

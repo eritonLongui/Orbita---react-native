@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "649295071611",
+    "project_id": "orbita-fiap",
+    "storage_bucket": "orbita-fiap.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:649295071611:android:3efe4432aa5803409515de",
+        "android_client_info": {
+          "package_name": "com.orbita.fiap"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "649295071611-ds35rvbjugjua54gc5i6bbp004ifu59e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDos2q7EPZUyditcovzWTZpI2qr6_Kag-w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "649295071611-ds35rvbjugjua54gc5i6bbp004ifu59e.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "649295071611-7nfpj2sibkpa14bm60gkt5l8p5keli8i.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.orbita.fiap"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
