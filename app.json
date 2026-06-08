@@ -4,7 +4,7 @@
     "slug": "Orbita",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/icon_temp.png",
     "userInterfaceStyle": "dark",
     "scheme": "orbita",
     "splash": {
@@ -20,7 +20,7 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#000000",
-        "foregroundImage": "./assets/android-icon-foreground.png",
+        "foregroundImage": "./assets/icon_temp.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
