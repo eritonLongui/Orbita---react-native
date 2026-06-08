@@ -15,7 +15,10 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.orbita.fiap",
-      "googleServicesFile": "./GoogleService-Info.plist"
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -25,7 +28,14 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "package": "com.orbita.fiap",
-      "predictiveBackGestureEnabled": false
+      "googleServicesFile": "./google-services.json",
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -56,6 +66,12 @@
           "photosPermission": "O Orbita usa suas fotos para conversar com a Lyra."
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "2482b9e2-bd6b-4ace-9083-205051c6bbd7"
+      }
+    },
+    "owner": "marcomendessv"
   }
 }

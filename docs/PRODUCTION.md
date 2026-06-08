@@ -61,9 +61,39 @@ Opcional: configure também no Firebase:
 - regras do Storage (`avatars/{userId}`)
 - domínios autorizados para OAuth
 
-### 2. Build de produção do app (EAS)
+### 2. Login Google em produção (funciona para **qualquer** usuário)
 
-Instale o EAS CLI e vincule o projeto Expo:
+Em dev, cada notebook Android tem SHA-1 diferente — por isso só quem cadastrou o fingerprint loga.
+
+Em **produção**, todo mundo instala o **mesmo** `.ipa` / `.apk` assinado com **um** certificado. Você cadastra **esse** SHA-1 no Firebase uma vez e pronto — professor, colega e usuário final logam igual.
+
+#### 2.1 Firebase (uma vez)
+
+1. [Firebase Console](https://console.firebase.google.com/) → **orbita-fiap**
+2. **Authentication** → **Google** → ativado
+3. **Project Settings** → app **Android** `com.orbita.fiap`
+   - Se não existir, crie e baixe `google-services.json` → coloque na **raiz do repo**
+   - Em `app.json`, adicione em `android`:
+     ```json
+     "googleServicesFile": "./google-services.json"
+     ```
+4. App **iOS** `com.orbita.fiap` — `GoogleService-Info.plist` já está no repo
+
+#### 2.2 SHA-1 do build de produção (não do notebook de cada dev)
+
+Depois do primeiro build EAS Android:
+
+```bash
+eas credentials -p android
+```
+
+Copie o **SHA-1** (e SHA-256) do keystore de **upload/production** e cadastre em Firebase → Android app → **Add fingerprint**.
+
+Se for publicar na **Play Store**, cadastre também o SHA-1 de **App signing** (Play Console → Setup → App signing) — a Google re-assina o app e esse fingerprint também precisa estar no Firebase.
+
+> iOS em produção (TestFlight/App Store): não usa SHA-1; o plist + bundle id bastam.
+
+#### 2.3 Build EAS
 
 ```bash
 npm install -g eas-cli
@@ -71,24 +101,27 @@ eas login
 eas build:configure
 ```
 
-Defina secrets de **build** no Expo (só para gerar o binário — não vão para o repositório):
+Opcional — secrets no Expo (só se quiser sobrescrever `publicEnv.ts`):
 
 ```bash
 eas secret:create --scope project --name EXPO_PUBLIC_SUPABASE_URL --value "https://....supabase.co"
-eas secret:create --scope project --name EXPO_PUBLIC_SUPABASE_ANON_KEY --value "sb_publishable_..."
-# ... demais EXPO_PUBLIC_* se quiser sobrescrever publicEnv.ts
 ```
 
-Gere o app:
+**Teste interno (FIAP, antes da loja):**
+
+```bash
+eas build --platform ios --profile preview
+eas build --platform android --profile preview
+```
+
+**Loja (produção final):**
 
 ```bash
 eas build --platform ios --profile production
 eas build --platform android --profile production
 ```
 
-O `eas.json` na raiz define o profile `production`.
-
-**Alternativa FIAP (sem EAS pago):** build local após `expo prebuild` e assinatura manual — as chaves públicas em `src/config/publicEnv.ts` já entram no bundle.
+Perfis em `eas.json`: `preview` gera APK para link interno; `production` gera AAB/IPA para lojas.
 
 ### 3. Distribuir para usuários
 
@@ -99,7 +132,9 @@ O `eas.json` na raiz define o profile `production`.
 | **Firebase App Distribution** | link direto para testadores |
 | **Lojas** (App Store / Play produção) | lançamento público |
 
-Usuário: instala → abre → login Google → tudo funciona.
+Usuário: instala o **binário de produção** → abre → login Google → funciona (sem configurar nada).
+
+**Não** peça para usuários finais rodarem `npm run ios` ou cadastrarem SHA-1 — isso é só ambiente de desenvolvimento. Veja também [GOOGLE_LOGIN.md](./GOOGLE_LOGIN.md).
 
 ---
 
@@ -128,7 +163,9 @@ Se no futuro tiver projeto Supabase separado para prod, atualize `publicEnv.ts` 
 - [ ] RLS migrations aplicadas (`005`, `006` Firebase JWT)
 - [ ] `lyra-chat` deployada e testada com usuário real
 - [ ] Firebase Storage rules para avatares
-- [ ] Build **production** (não Expo Go) para image picker / Google Sign-In nativo
+- [ ] `google-services.json` no repo + `googleServicesFile` no `app.json` (Android)
+- [ ] SHA-1 do keystore **EAS/production** (e Play App Signing, se Android na loja) no Firebase
+- [ ] Build **preview** ou **production** via EAS (não Expo Go / não dev build local)
 - [ ] Política de privacidade / termos (tela já existe no app)
 
 ---
