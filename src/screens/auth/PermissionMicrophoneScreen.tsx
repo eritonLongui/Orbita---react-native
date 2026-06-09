@@ -20,9 +20,12 @@ export function PermissionMicrophoneScreen({ onContinue }: PermissionMicrophoneS
   return (
     <ScreenWrapper scrollable={false}>
       <PermissionCard
-        title="Microfone"
-        message="Necessário para conversar com a Lyra por voz."
+        title="Fale com a Lyra"
+        context="A voz torna o check-in mais natural — como conversar com uma coach."
+        message="O microfone permite contar como foi seu dia em voz alta. Você também pode usar o modo texto depois."
         onAllow={handleAllow}
+        onSkip={onContinue}
+        skipLabel="Continuar sem voz"
         loading={loading}
       />
     </ScreenWrapper>

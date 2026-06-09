@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { getMissionData, getOrbitDetails } from '../services/orbitData';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../providers/AuthProvider';
+import { useMockData } from '../providers/MockDataProvider';
 import { MissionHeroState, OrbitAreaDetail, OrbitAreaSummary } from '../types';
 import {
   ORBIT_AREAS,
@@ -18,8 +19,21 @@ interface OrbitStatusState {
   hasData: boolean;
 }
 
+function buildMockState(): OrbitStatusState {
+  const mock = getMissionData();
+  return {
+    loading: false,
+    heroState: mock.heroState,
+    areas: mock.areas,
+    details: getOrbitDetails(),
+    insight: mock.insight,
+    hasData: true,
+  };
+}
+
 export function useOrbitStatus(): OrbitStatusState {
   const { user } = useAuth();
+  const { enabled: mockDataEnabled, ready: mockDataReady } = useMockData();
   const [state, setState] = useState<OrbitStatusState>(() => {
     const mock = getMissionData();
     return {
@@ -33,11 +47,16 @@ export function useOrbitStatus(): OrbitStatusState {
   });
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || !mockDataReady) return;
 
     let cancelled = false;
 
     async function load() {
+      if (mockDataEnabled) {
+        if (!cancelled) setState(buildMockState());
+        return;
+      }
+
       const { data: insights } = await supabase
         .from('weekly_insights')
         .select('summary, pillar_scores')
@@ -86,7 +105,7 @@ export function useOrbitStatus(): OrbitStatusState {
     return () => {
       cancelled = true;
     };
-  }, [user]);
+  }, [user, mockDataEnabled, mockDataReady]);
 
   return state;
 }

@@ -60,7 +60,7 @@
     "setup:android": "bash scripts/setup.sh --android",
     "setup:all": "bash scripts/setup.sh --all",
     "setup:check": "bash scripts/setup.sh --check-only",
-    "start": "expo start",
+    "start": "expo start --dev-client --host lan",
     "android": "expo run:android",
     "ios": "bash scripts/run-ios.sh",
     "ios:prebuild": "expo prebuild --platform ios",

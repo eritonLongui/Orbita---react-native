@@ -83,9 +83,11 @@ export interface ConversationMessage {
 }
 
 export interface LyraChatResponse {
-  transcript: string;
+  transcript?: string;
   reply: string;
   audioBase64?: string;
+  checkInComplete?: boolean;
+  areasCovered?: string[];
 }
 
 export interface Milestone {

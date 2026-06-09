@@ -1,13 +1,14 @@
 import { StatusBar } from "expo-status-bar";
 import { MotiView } from "moti";
 import { useEffect } from "react";
-import { Image, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 import { Easing } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text, YStack } from "tamagui";
 
 import { AppBackground } from "../../components/ui/AppBackground";
 import { GradientText } from "../../components/ui/GradientText";
+import { OrbitaLogo } from "../../components/ui/OrbitaLogo";
 import { themeColors } from "../../constants/theme";
 
 interface SplashScreenProps {
@@ -77,25 +78,6 @@ export function SplashScreen({ onFinish }: SplashScreenProps) {
         <OrbitalPulse delay={2000} size={280} />
         <OrbitalPulse delay={4000} size={280} />
 
-        {/* Glow Atmosférico Core */}
-        <MotiView
-          from={{
-            opacity: 0,
-            scale: 0.6,
-          }}
-          animate={{
-            opacity: 1,
-            scale: 1,
-          }}
-          transition={{
-            type: "spring",
-            damping: 25,
-            stiffness: 80,
-            mass: 1,
-          }}
-          style={styles.glow}
-        />
-
         {/* Contêiner do Logo com entrada física premium */}
         <MotiView
           from={{
@@ -129,11 +111,7 @@ export function SplashScreen({ onFinish }: SplashScreenProps) {
               repeatReverse: true,
             }}
           >
-            <Image
-              source={require("../../../assets/icon_temp.png")}
-              resizeMode="contain"
-              style={styles.logo}
-            />
+            <OrbitaLogo size={120} />
           </MotiView>
         </MotiView>
 
@@ -193,20 +171,6 @@ export function SplashScreen({ onFinish }: SplashScreenProps) {
 }
 
 const styles = StyleSheet.create({
-  logo: {
-    width: 120,
-    height: 120,
-    borderRadius: 28,
-  },
-  glow: {
-    position: "absolute",
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    backgroundColor: "#4B8BFF", // Cor central da identidade
-    opacity: 0.12, // Transparência gerida nativamente com alto desfoque visual
-    filter: [{ blur: 40 }], // Se suportado pelo expo/react-native na sua versão, adiciona um aspecto difuso belíssimo
-  },
   orbitalRing: {
     position: "absolute",
     borderWidth: 1,

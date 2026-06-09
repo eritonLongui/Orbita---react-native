@@ -148,6 +148,7 @@ Documentação completa: [`docs/PRODUCTION.md`](docs/PRODUCTION.md)
 | [`docs/SECRETS.md`](docs/SECRETS.md) | Variáveis de ambiente e quem precisa de quê |
 | [`docs/GOOGLE_LOGIN.md`](docs/GOOGLE_LOGIN.md) | Login Google e `DEVELOPER_ERROR` |
 | [`docs/PRODUCTION.md`](docs/PRODUCTION.md) | Distribuição, EAS e usuários finais |
+| [`docs/USER_JOURNEY.md`](docs/USER_JOURNEY.md) | Jornada do usuário, narrativa e backlog UX |
 
 ---
 

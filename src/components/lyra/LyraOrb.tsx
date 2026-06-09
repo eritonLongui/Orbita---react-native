@@ -48,8 +48,8 @@ const METRICS: Record<LyraOrbSize, OrbMetrics> = {
 type OrbVisualState = 'idle' | 'listening' | 'thinking';
 
 function mapState(state: LyraSessionState): OrbVisualState {
-  if (state === 'recording') return 'listening';
-  if (state === 'processing' || state === 'responding') return 'thinking';
+  if (state === 'recording' || state === 'processing') return 'listening';
+  if (state === 'responding') return 'thinking';
   return 'idle';
 }
 
@@ -225,7 +225,7 @@ export function LyraOrb({
       />
 
       {metrics.showRings
-        ? [0, 1, 2].map((i) => (
+        ? (visual === 'thinking' ? [0] : [0, 1, 2]).map((i) => (
             <MotiView
               key={i}
               animate={{

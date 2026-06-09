@@ -1,5 +1,6 @@
 export type AuthStackParamList = {
   Welcome: undefined;
+  OnboardingPillars: undefined;
   OnboardingProfile: undefined;
   PermissionMicrophone: undefined;
   PermissionNotifications: undefined;

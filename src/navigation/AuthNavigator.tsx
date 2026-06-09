@@ -1,10 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
+import { OnboardingPillarsScreen } from '../screens/auth/OnboardingPillarsScreen';
 import { OnboardingProfileScreen } from '../screens/auth/OnboardingProfileScreen';
 import { PermissionMicrophoneScreen } from '../screens/auth/PermissionMicrophoneScreen';
 import { PermissionNotificationsScreen } from '../screens/auth/PermissionNotificationsScreen';
 import { WelcomeAuthScreen } from '../screens/auth/WelcomeAuthScreen';
+import { markFirstLyraPending } from '../services/journey';
 import { AuthStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
@@ -24,6 +26,7 @@ export function AuthNavigator({ initialRoute, onOnboardingComplete }: AuthNaviga
 
   const finishPermissions = async () => {
     await AsyncStorage.setItem(PERMISSIONS_KEY, 'true');
+    await markFirstLyraPending();
     onOnboardingComplete();
   };
 
@@ -37,12 +40,19 @@ export function AuthNavigator({ initialRoute, onOnboardingComplete }: AuthNaviga
       screenOptions={{ headerShown: false, animation: 'fade' }}
     >
       <Stack.Screen name="Welcome" component={WelcomeAuthScreen} />
+      <Stack.Screen name="OnboardingPillars">
+        {({ navigation }) => (
+          <OnboardingPillarsScreen
+            onContinue={() => navigation.navigate('OnboardingProfile')}
+          />
+        )}
+      </Stack.Screen>
       <Stack.Screen name="OnboardingProfile">
         {({ navigation }) => (
           <OnboardingProfileScreen
             onComplete={() => {
               if (permissionsDone) {
-                onOnboardingComplete();
+                void markFirstLyraPending().then(onOnboardingComplete);
               } else {
                 navigation.navigate('PermissionMicrophone');
               }

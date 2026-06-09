@@ -2,9 +2,11 @@ import { useCallback, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getLyraVoiceConfigFromProfile } from '../constants/lyraVoice';
 import { pickChatImage } from '../services/chatImage';
+import { CHECK_IN_OPENING_FALLBACK, getCheckInAreasCovered } from '../services/checkIn';
 import { sendToLyra } from '../services/conversation';
 import { useAuth } from '../providers/AuthProvider';
 import { useLyraState } from '../providers/LyraStateProvider';
+import { processCheckInResponse } from '../utils/checkInResponse';
 
 export interface ChatMessage {
   id: string;
@@ -14,9 +16,21 @@ export interface ChatMessage {
   imageUri?: string;
 }
 
-const STORAGE_KEY = 'lyra_text_messages';
+function isToday(date: Date): boolean {
+  return date.toDateString() === new Date().toDateString();
+}
 
-export function useLyraTextChat() {
+function filterTodayMessages(messages: ChatMessage[]): ChatMessage[] {
+  return messages.filter((msg) => isToday(msg.timestamp));
+}
+
+interface UseLyraTextChatOptions {
+  checkInMode?: boolean;
+  syncLyraState?: boolean;
+  onCheckInComplete?: (isFirstCompletion: boolean) => void;
+}
+
+export function useLyraTextChat(options?: UseLyraTextChatOptions) {
   const { profile } = useAuth();
   const { setLyraState } = useLyraState();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -24,55 +38,36 @@ export function useLyraTextChat() {
   const [error, setError] = useState<string | null>(null);
 
   const voiceConfig = getLyraVoiceConfigFromProfile(profile);
+  const checkInMode = options?.checkInMode ?? false;
+  const syncLyraState = options?.syncLyraState ?? true;
 
-  // Carregar mensagens salvas ao inicializar
   useEffect(() => {
-    const loadMessages = async () => {
-      try {
-        const saved = await AsyncStorage.getItem(STORAGE_KEY);
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          // Converter timestamps de volta para Date objects
-          const messagesWithDates = parsed.map((msg: any) => ({
-            ...msg,
-            timestamp: new Date(msg.timestamp),
-          }));
-          setMessages(messagesWithDates);
-        }
-      } catch (e) {
-        console.warn('Failed to load messages:', e);
-      }
-    };
-    loadMessages();
+    void AsyncStorage.removeItem('lyra_text_messages');
   }, []);
 
-  // Salvar mensagens quando alteradas
   useEffect(() => {
-    const saveMessages = async () => {
-      try {
-        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
-      } catch (e) {
-        console.warn('Failed to save messages:', e);
-      }
-    };
-    if (messages.length > 0) {
-      saveMessages();
-    }
-  }, [messages]);
-
-  // Sincronizar estado de loading com o contexto global
-  useEffect(() => {
+    if (!syncLyraState) return;
     if (isLoading) {
       setLyraState('processing');
     } else {
       setLyraState('idle');
     }
-  }, [isLoading, setLyraState]);
+  }, [isLoading, setLyraState, syncLyraState]);
+
+  const appendLyraMessage = useCallback((text: string) => {
+    const lyraMessage: ChatMessage = {
+      id: Date.now().toString() + '-lyra',
+      text,
+      isUser: false,
+      timestamp: new Date(),
+    };
+    setMessages((prev) => filterTodayMessages([...prev, lyraMessage]));
+  }, []);
 
   const sendMessage = useCallback(
     async (
       text: string,
-      image?: { uri: string; base64: string; mimeType: string }
+      image?: { uri: string; base64: string; mimeType: string },
     ) => {
       const trimmed = text.trim();
       if (isLoading || (!trimmed && !image)) return;
@@ -87,11 +82,12 @@ export function useLyraTextChat() {
         imageUri: image?.uri,
       };
 
-      setMessages((prev) => [...prev, userMessage]);
+      setMessages((prev) => filterTodayMessages([...prev, userMessage]));
       setIsLoading(true);
       setError(null);
 
       try {
+        const areasCovered = checkInMode ? await getCheckInAreasCovered() : undefined;
         const response = await sendToLyra({
           text: trimmed || undefined,
           imageBase64: image?.base64,
@@ -99,16 +95,12 @@ export function useLyraTextChat() {
           voiceEnabled: false,
           voiceStyle: voiceConfig.style,
           voiceAccent: voiceConfig.accent,
+          checkInMode: checkInMode && !image,
+          areasCovered,
         });
 
-        const lyraMessage: ChatMessage = {
-          id: Date.now().toString() + '-lyra',
-          text: response.reply,
-          isUser: false,
-          timestamp: new Date(),
-        };
-
-        setMessages((prev) => [...prev, lyraMessage]);
+        appendLyraMessage(response.reply);
+        await processCheckInResponse(response, checkInMode, options?.onCheckInComplete);
       } catch (e) {
         console.warn('sendMessage failed:', e);
         setError(e instanceof Error ? e.message : 'Erro ao enviar mensagem.');
@@ -116,8 +108,39 @@ export function useLyraTextChat() {
         setIsLoading(false);
       }
     },
-    [isLoading, voiceConfig]
+    [isLoading, voiceConfig, checkInMode, options, appendLyraMessage],
   );
+
+  const initiateCheckIn = useCallback(async (): Promise<boolean> => {
+    if (isLoading || !checkInMode) return false;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const areasCovered = await getCheckInAreasCovered();
+      const response = await sendToLyra({
+        text: 'Iniciar check-in',
+        checkInMode: true,
+        initiateCheckIn: true,
+        areasCovered,
+        voiceEnabled: false,
+        voiceStyle: voiceConfig.style,
+        voiceAccent: voiceConfig.accent,
+      });
+
+      appendLyraMessage(response.reply);
+      await processCheckInResponse(response, true, options?.onCheckInComplete);
+      return true;
+    } catch (e) {
+      console.warn('initiateCheckIn failed, using local opening:', e);
+      appendLyraMessage(CHECK_IN_OPENING_FALLBACK.reply);
+      await processCheckInResponse(CHECK_IN_OPENING_FALLBACK, true, options?.onCheckInComplete);
+      return true;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isLoading, checkInMode, voiceConfig, options, appendLyraMessage]);
 
   const pickImage = useCallback(async () => {
     try {
@@ -130,21 +153,19 @@ export function useLyraTextChat() {
     }
   }, []);
 
-  const clearMessages = useCallback(async () => {
+  const clearMessages = useCallback(() => {
     setMessages([]);
     setError(null);
-    try {
-      await AsyncStorage.removeItem(STORAGE_KEY);
-    } catch (e) {
-      console.warn('Failed to clear messages:', e);
-    }
   }, []);
 
+  const todayMessages = filterTodayMessages(messages);
+
   return {
-    messages,
+    messages: todayMessages,
     isLoading,
     error,
     sendMessage,
+    initiateCheckIn,
     pickImage,
     clearMessages,
   };

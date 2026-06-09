@@ -28,23 +28,60 @@ export interface SendToLyraParams {
   voiceEnabled?: boolean;
   voiceStyle?: LyraVoiceStyle;
   voiceAccent?: LyraVoiceAccent;
+  checkInMode?: boolean;
+  initiateCheckIn?: boolean;
+  areasCovered?: string[];
+}
+
+const LYRA_TIMEOUT_MS = 35_000;
+
+async function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timeoutId = setTimeout(() => reject(new Error(message)), ms);
+  });
+
+  try {
+    return await Promise.race([promise, timeout]);
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
+  }
 }
 
 export async function sendToLyra(params: SendToLyraParams): Promise<LyraChatResponse> {
-  const { data, error } = await supabase.functions.invoke('lyra-chat', {
-    body: params,
-  });
+  const { data, error } = await withTimeout(
+    supabase.functions.invoke('lyra-chat', { body: params }),
+    LYRA_TIMEOUT_MS,
+    'A Lyra demorou demais. Tente novamente.',
+  );
 
   if (error) {
     let message = error.message || 'Falha ao conversar com a Lyra';
+    let serverDetail: string | undefined;
 
     if (error instanceof FunctionsHttpError && error.context) {
       try {
         const body = await error.context.json();
-        if (body?.error) message = body.error;
+        if (typeof body?.error === 'string' && body.error.trim()) {
+          serverDetail = body.error.trim();
+        } else if (typeof body?.message === 'string' && body.message.trim()) {
+          serverDetail = body.message.trim();
+        }
       } catch {
-        // keep default message
+        try {
+          const raw = await error.context.text();
+          if (raw?.trim()) serverDetail = raw.trim();
+        } catch {
+          // keep default message
+        }
       }
+    }
+
+    if (serverDetail) {
+      message = serverDetail;
+    } else if (message.includes('non-2xx')) {
+      message =
+        'A Lyra não respondeu. Verifique sua conexão ou tente novamente em instantes.';
     }
 
     throw new Error(message);

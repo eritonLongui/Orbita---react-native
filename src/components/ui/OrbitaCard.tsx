@@ -8,5 +8,5 @@ interface OrbitaCardProps {
 }
 
 export function OrbitaCard({ children, highlighted = false, subtle = false }: OrbitaCardProps) {
-  return <GlassCard highlighted={highlighted} subtle={subtle}>{children}</GlassCard>;
+  return <GlassCard highlighted={highlighted} subtle={subtle} padding>{children}</GlassCard>;
 }

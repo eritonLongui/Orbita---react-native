@@ -8,14 +8,22 @@ import { themeColors } from '../../constants/theme';
 import { ConfirmationModal } from '../../components/orbit';
 import { LogoutButton } from '../../components/settings/LogoutButton';
 import { SettingsMenuRow } from '../../components/settings/SettingsMenuRow';
+import { OrbitaCard } from '../../components/ui/OrbitaCard';
+import { OrbitaSwitch } from '../../components/ui/OrbitaSwitch';
 import { ScreenWrapper } from '../../components/ui/ScreenWrapper';
 import { ProfileStackParamList } from '../../navigation/types';
+import { useJourney } from '../../hooks/useJourney';
 import { useAuth } from '../../providers/AuthProvider';
+import { useMockData } from '../../providers/MockDataProvider';
+import { resetTodayCheckIn } from '../../services/checkIn';
 import { getProfileInitial, getProfilePhotoUrl } from '../../utils/profilePhoto';
 
 export function ProfileHomeScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<ProfileStackParamList>>();
   const { profile, user, signOutUser } = useAuth();
+  const { enabled: mockDataEnabled, ready: mockDataReady, setEnabled: setMockDataEnabled } =
+    useMockData();
+  const { refresh: refreshJourney } = useJourney();
   const [logoutVisible, setLogoutVisible] = useState(false);
   const photoUrl = getProfilePhotoUrl(profile, user);
   const initial = getProfileInitial(profile, user);
@@ -94,6 +102,54 @@ export function ProfileHomeScreen() {
               onPress={item.onPress}
             />
           ))}
+        </YStack>
+
+        <YStack gap="$2">
+          <Text fontSize={13} fontWeight="800" letterSpacing={1.2} color="$textMuted">
+            ÁREA DE TESTES
+          </Text>
+          <OrbitaCard>
+            <XStack items="center" justify="space-between" gap="$3">
+              <YStack flex={1} gap="$1">
+                <Text fontSize={15} fontWeight="600" color="$text">
+                  Dados mockados
+                </Text>
+                <Text fontSize={13} color="$textMuted" lineHeight={18}>
+                  Exibe órbita, resumo e evolução simulados na Orbita.
+                </Text>
+              </YStack>
+              <OrbitaSwitch
+                checked={mockDataEnabled}
+                disabled={!mockDataReady}
+                onCheckedChange={(checked) => {
+                  void setMockDataEnabled(checked);
+                }}
+              />
+            </XStack>
+          </OrbitaCard>
+          <OrbitaCard>
+            <YStack gap="$2">
+              <Text fontSize={15} fontWeight="600" color="$text">
+                Reiniciar check-in de hoje
+              </Text>
+              <Text fontSize={13} color="$textMuted" lineHeight={18}>
+                Limpa o check-in do dia para testar o fluxo guiado com a Lyra.
+              </Text>
+              <Text
+                fontSize={14}
+                fontWeight="600"
+                color="$primary"
+                onPress={() => {
+                  void (async () => {
+                    await resetTodayCheckIn();
+                    await refreshJourney();
+                  })();
+                }}
+              >
+                Reiniciar
+              </Text>
+            </YStack>
+          </OrbitaCard>
         </YStack>
 
         <LogoutButton onPress={() => setLogoutVisible(true)} />

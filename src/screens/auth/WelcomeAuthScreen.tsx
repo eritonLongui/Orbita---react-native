@@ -61,7 +61,7 @@ export function WelcomeAuthScreen() {
           </YStack>
 
           <Text fontSize={19} lineHeight={28} maxWidth={320} style={descriptionStyle}>
-            Acompanhe sua órbita{'\n'}e converse com a Lyra.
+            Seu copiloto de rotina — clareza, direção e continuidade no dia a dia.
           </Text>
         </YStack>
 

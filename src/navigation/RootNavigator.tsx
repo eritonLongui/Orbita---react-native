@@ -15,7 +15,7 @@ export function RootNavigator() {
 
   const authInitialRoute = useMemo<keyof AuthStackParamList>(() => {
     if (!user) return 'Welcome';
-    if (!profile?.onboarding_completed && !onboardingDone) return 'OnboardingProfile';
+    if (!profile?.onboarding_completed && !onboardingDone) return 'OnboardingPillars';
     return 'Welcome';
   }, [user, profile?.onboarding_completed, onboardingDone]);
 

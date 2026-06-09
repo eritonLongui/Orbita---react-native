@@ -1,5 +1,4 @@
 import {
-  CalendarBlank,
   CheckCircle,
   Clock,
   Drop,
@@ -26,7 +25,6 @@ import { GlassCard } from '../ui/GlassCard';
 
 interface HomeStatsGridProps {
   areas: OrbitAreaSummary[];
-  missionDay: number;
   weeklyDelta?: number;
 }
 
@@ -120,7 +118,7 @@ function StatBlock({
   );
 }
 
-export function HomeStatsGrid({ areas, missionDay, weeklyDelta = 12 }: HomeStatsGridProps) {
+export function HomeStatsGrid({ areas, weeklyDelta = 12 }: HomeStatsGridProps) {
   const orbitAvg = Math.round(areas.reduce((sum, a) => sum + a.score, 0) / areas.length);
   const balancedCount = areas.filter(
     (a) => a.status === 'balanced' || a.status === 'excellent',
@@ -132,28 +130,12 @@ export function HomeStatsGrid({ areas, missionDay, weeklyDelta = 12 }: HomeStats
 
   return (
     <YStack gap="$3">
-      <Text fontSize={22} fontWeight="800" color="$text">
-        Resumo de hoje
-      </Text>
-
-      <YStack gap="$3">
-        <StatBlock
+      <StatBlock
           headlineIcon={Planet}
           label="Como está sua órbita"
           headline={orbitScoreToHeadline(orbitAvg)}
           detail="Média geral das 5 áreas"
           visual={<ProgressBar value={orbitAvg} />}
-        />
-        <StatBlock
-          headlineIcon={CalendarBlank}
-          label="Sua jornada"
-          headline={`Dia ${missionDay}`}
-          detail="Desde que você entrou"
-          visual={
-            missionDay > 1 ? (
-              <ProgressBar value={Math.min(100, missionDay * 4)} color={themeColors.primarySoft} />
-            ) : null
-          }
         />
         <StatBlock
           headlineIcon={CheckCircle}
@@ -187,7 +169,6 @@ export function HomeStatsGrid({ areas, missionDay, weeklyDelta = 12 }: HomeStats
           }
           detail={orbitStatusDescription(focusArea.status)}
         />
-      </YStack>
     </YStack>
   );
 }

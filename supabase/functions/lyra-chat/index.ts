@@ -5,10 +5,46 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const LYRA_SYSTEM_PROMPT = `Você é Lyra, assistente de bem-estar do app Orbita — um copiloto inspirado em missões espaciais.
+const LYRA_SYSTEM_PROMPT = `Você é Lyra, coach de bem-estar da Orbita — um copiloto de rotina inspirado em missões espaciais.
 Tom: calmo, claro, acolhedor, sem jargão clínico. Respostas curtas (2-4 frases).
 Áreas de acompanhamento: Descanso, Energia, Ritmo, Nutrição, Bem-estar.
-Nunca diagnostique. Sugira próximos passos práticos.`;
+Nunca diagnostique. Sugira próximos passos práticos.
+
+FORA DO CHECK-IN (perguntas livres, desabafos, imagens):
+- Responda normalmente com empatia e orientação prática.`;
+
+const CHECK_IN_JSON_PROMPT = `MODO CHECK-IN ATIVO. Responda APENAS com JSON válido neste formato:
+{"reply":"mensagem ao usuário em português, 2-4 frases","areasCovered":["sleep"],"checkInComplete":false}
+
+IDs das áreas (use exatamente estes): sleep=Descanso, energy=Energia, routine=Ritmo, nutrition=Nutrição, wellbeing=Bem-estar.
+
+Regras obrigatórias:
+- Conduza ativamente. Uma área por vez, nesta ordem: sleep → energy → routine → nutrition → wellbeing.
+- areasCovered: somente áreas com resposta substantiva do usuário nesta conversa.
+- checkInComplete: true SOMENTE quando as 5 áreas estiverem em areasCovered e a reply tiver resumo final do dia.
+- NUNCA checkInComplete true se o usuário só cumprimentou (oi, olá, hey) sem responder sobre áreas.
+- NUNCA checkInComplete true na primeira troca ou sem pelo menos 4 respostas do usuário sobre áreas distintas.
+- Ao iniciar check-in, faça a primeira pergunta sobre Descanso (sleep) na reply.`;
+
+const CHECK_IN_AREA_IDS = ['sleep', 'energy', 'routine', 'nutrition', 'wellbeing'] as const;
+
+function parseCheckInResponse(raw: string) {
+  try {
+    const parsed = JSON.parse(raw);
+    const reply = typeof parsed.reply === 'string' ? parsed.reply.trim() : '';
+    const areasCovered = Array.isArray(parsed.areasCovered)
+      ? parsed.areasCovered.filter((id: string) =>
+          CHECK_IN_AREA_IDS.includes(id as (typeof CHECK_IN_AREA_IDS)[number])
+        )
+      : [];
+    const allCovered = CHECK_IN_AREA_IDS.every((id) => areasCovered.includes(id));
+    const checkInComplete = parsed.checkInComplete === true && allCovered && areasCovered.length === 5;
+    if (!reply) return null;
+    return { reply, areasCovered, checkInComplete };
+  } catch {
+    return null;
+  }
+}
 
 const VOICE_STYLES: Record<
   string,
@@ -107,6 +143,7 @@ function buildVoicePreset(
   };
 }
 
+// check-in v2: initiateCheckIn + JSON estruturado
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -150,6 +187,9 @@ Deno.serve(async (req) => {
       voiceStyle = 'calm',
       voiceAccent = 'none',
       voiceTone,
+      checkInMode = false,
+      initiateCheckIn = false,
+      areasCovered: clientAreasCovered = [],
     } = body;
 
     let transcript = text?.trim() ?? '';
@@ -167,6 +207,10 @@ Deno.serve(async (req) => {
       form.append('file', new Blob([audioBytes], { type: mime }), `recording.${ext}`);
       form.append('model', 'whisper-1');
       form.append('language', 'pt');
+      form.append(
+        'prompt',
+        'Conversa de check-in de bem-estar em português brasileiro. Descanso, sono, energia, rotina, nutrição, bem-estar.',
+      );
 
       const whisperRes = await fetch('https://api.openai.com/v1/audio/transcriptions', {
         method: 'POST',
@@ -183,8 +227,12 @@ Deno.serve(async (req) => {
       transcript = whisperData.text ?? '';
     }
 
-    if (!transcript && !hasImage) {
+    if (!transcript && !hasImage && !(checkInMode && initiateCheckIn)) {
       return json({ error: 'Nenhum conteúdo para processar' }, 400);
+    }
+
+    if (checkInMode && initiateCheckIn && !transcript) {
+      transcript = '[Iniciar check-in]';
     }
 
     if (hasImage && !transcript) {
@@ -193,7 +241,7 @@ Deno.serve(async (req) => {
 
     const { data: history } = await supabase
       .from('conversation_logs')
-      .select('role, content')
+      .select('role, content, created_at')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
       .limit(8);
@@ -213,9 +261,24 @@ Deno.serve(async (req) => {
       );
     }
 
+    if (checkInMode) {
+      const covered =
+        Array.isArray(clientAreasCovered) && clientAreasCovered.length > 0
+          ? clientAreasCovered.join(', ')
+          : 'nenhuma ainda';
+      contextParts.push(
+        `Check-in em andamento. Áreas já cobertas pelo cliente: ${covered}. Continue de onde parou.`
+      );
+      if (initiateCheckIn) {
+        contextParts.push(
+          'O usuário acabou de abrir o check-in. Comece perguntando sobre Descanso (sleep).'
+        );
+      }
+    }
+
     const historyMessages = (history ?? [])
       .reverse()
-      .map((m: { role: string; content: string }) => ({
+      .map((m: { role: string; content: string; created_at: string }) => ({
         role: m.role === 'assistant' ? 'assistant' : 'user',
         content: m.content,
       }));
@@ -240,6 +303,7 @@ Deno.serve(async (req) => {
 
     const chatMessages = [
       { role: 'system', content: LYRA_SYSTEM_PROMPT },
+      ...(checkInMode ? [{ role: 'system', content: CHECK_IN_JSON_PROMPT }] : []),
       ...(contextParts.length ? [{ role: 'system', content: contextParts.join(' ') }] : []),
       ...historyMessages,
       { role: 'user', content: userContent },
@@ -254,8 +318,11 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         model: hasImage ? 'gpt-4o' : 'gpt-4o-mini',
         messages: chatMessages,
-        max_tokens: 300,
-        temperature: 0.7,
+        max_tokens: checkInMode ? 400 : 300,
+        temperature: checkInMode ? 0.4 : 0.7,
+        ...(checkInMode && !hasImage
+          ? { response_format: { type: 'json_object' } }
+          : {}),
       }),
     });
 
@@ -265,7 +332,21 @@ Deno.serve(async (req) => {
     }
 
     const chatData = await chatRes.json();
-    const reply = chatData.choices?.[0]?.message?.content?.trim() ?? 'Estou aqui com você. Como posso ajudar?';
+    const rawReply = chatData.choices?.[0]?.message?.content?.trim() ?? '';
+
+    let reply =
+      rawReply || 'Estou aqui com você. Como posso ajudar?';
+    let checkInComplete = false;
+    let areasCovered: string[] = [];
+
+    if (checkInMode && !hasImage) {
+      const parsed = parseCheckInResponse(rawReply);
+      if (parsed) {
+        reply = parsed.reply;
+        areasCovered = parsed.areasCovered;
+        checkInComplete = parsed.checkInComplete;
+      }
+    }
 
     const channel = audioBase64 ? 'voice' : 'text';
     const loggedUserContent = hasImage
@@ -321,7 +402,12 @@ Deno.serve(async (req) => {
       }
     }
 
-    return json({ transcript, reply, audioBase64: audioResponseBase64 });
+    return json({
+      transcript,
+      reply,
+      audioBase64: audioResponseBase64,
+      ...(checkInMode ? { checkInComplete, areasCovered } : {}),
+    });
   } catch (e) {
     return json({ error: e instanceof Error ? e.message : 'Erro interno' }, 500);
   }

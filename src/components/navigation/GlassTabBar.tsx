@@ -9,6 +9,7 @@ import {
 } from 'phosphor-react-native';
 import React from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
+import { Text } from 'tamagui';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LYRA_TAB_ORB_SIZE, LyraTabOrb } from '../lyra/LyraTabOrb';
 import { themeColors } from '../../constants/theme';
@@ -33,6 +34,14 @@ const TAB_ICONS: Record<
   Orbit: Planet,
   Evolution: TrendUp,
   Profile: User,
+};
+
+const TAB_LABELS: Record<TabRoute, string> = {
+  Mission: 'Missão',
+  Orbit: 'Órbita',
+  Lyra: 'Lyra',
+  Evolution: 'Evolução',
+  Profile: 'Perfil',
 };
 
 function TabCircle({
@@ -65,13 +74,24 @@ function TabCircle({
       onLongPress={onLongPress}
       style={({ pressed }) => [styles.tabButton, pressed && styles.tabPressed]}
       accessibilityRole="button"
+      accessibilityLabel={TAB_LABELS[route]}
       accessibilityState={{ selected: focused }}
     >
-      {isLyra ? (
-        <View style={styles.lyraTab}>{content}</View>
-      ) : (
-        <View style={[styles.circle, focused && styles.circleActive]}>{content}</View>
-      )}
+      <View style={styles.tabContent}>
+        {isLyra ? (
+          <View style={styles.lyraTab}>{content}</View>
+        ) : (
+          <View style={[styles.circle, focused && styles.circleActive]}>{content}</View>
+        )}
+        <Text
+          fontSize={9}
+          fontWeight="700"
+          color={focused ? '$primary' : '$textMuted'}
+          numberOfLines={1}
+        >
+          {TAB_LABELS[route]}
+        </Text>
+      </View>
     </Pressable>
   );
 }
@@ -187,6 +207,11 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  tabContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
   },
   tabPressed: {
     opacity: 0.85,

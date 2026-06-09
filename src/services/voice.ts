@@ -25,13 +25,13 @@ let silenceMonitor: ReturnType<typeof setInterval> | null = null;
 let onSilenceStopCallback: (() => void) | null = null;
 
 const SILENCE_POLL_MS = 100;
-const SILENCE_DURATION_MS = 1200;
+const POST_SPEECH_SILENCE_MS = 1000;
 const CALIBRATION_MS = 400;
 const SPEECH_ABOVE_NOISE_DB = 8;
 const SILENCE_ABOVE_NOISE_DB = 4;
 const PEAK_DROP_DB = 12;
 const SPEECH_STREAK_MS = 200;
-const MIN_SPEECH_MS = 600;
+const MIN_SPEECH_MS = 400;
 const MAX_RECORDING_MS = 45000;
 const NOISE_FLOOR_MIN = -65;
 const NOISE_FLOOR_MAX = -28;
@@ -71,7 +71,13 @@ function mimeForUri(uri: string): { mimeType: string; ext: string } {
   return { mimeType: 'audio/mp4', ext: 'm4a' };
 }
 
-export async function startRecording(onSilenceAutoStop?: () => void): Promise<void> {
+export interface StartRecordingOptions {
+  onSilenceAutoStop?: () => void;
+}
+
+export async function startRecording(options: StartRecordingOptions = {}): Promise<void> {
+  const { onSilenceAutoStop } = options;
+
   clearSilenceMonitor();
   onSilenceStopCallback = onSilenceAutoStop ?? null;
 
@@ -127,20 +133,22 @@ export async function startRecording(onSilenceAutoStop?: () => void): Promise<vo
 
     const speechThreshold = noiseFloor + SPEECH_ABOVE_NOISE_DB;
     const silenceThreshold = noiseFloor + SILENCE_ABOVE_NOISE_DB;
+    const isSpeaking = level >= speechThreshold;
 
-    if (level >= speechThreshold) {
+    if (isSpeaking) {
       speechStreakMs += SILENCE_POLL_MS;
       if (speechStreakMs >= SPEECH_STREAK_MS) {
         heardSpeech = true;
         peakLevel = Math.max(peakLevel, level);
       }
       silenceSince = null;
-      return;
+    } else {
+      speechStreakMs = 0;
     }
 
-    speechStreakMs = 0;
+    if (!heardSpeech) return;
 
-    if (!heardSpeech || status.durationMillis < MIN_SPEECH_MS) return;
+    if (status.durationMillis < MIN_SPEECH_MS) return;
 
     const belowNoiseSilence = level <= silenceThreshold;
     const belowPeakSilence = peakLevel > -100 && level <= peakLevel - PEAK_DROP_DB;
@@ -156,7 +164,7 @@ export async function startRecording(onSilenceAutoStop?: () => void): Promise<vo
       return;
     }
 
-    if (now - silenceSince >= SILENCE_DURATION_MS) {
+    if (now - silenceSince >= POST_SPEECH_SILENCE_MS) {
       finishSilence();
     }
   }, SILENCE_POLL_MS);
@@ -298,7 +306,7 @@ function bytesToBase64(bytes: Uint8Array): string {
   return result;
 }
 
-export async function playAudioBase64(base64: string): Promise<void> {
+export async function playAudioBase64(base64: string, maxWaitMs = 90_000): Promise<void> {
   await stopPlayback();
 
   await setAudioModeAsync({
@@ -306,17 +314,41 @@ export async function playAudioBase64(base64: string): Promise<void> {
     playsInSilentMode: true,
   });
 
-  if (Platform.OS === 'web') {
-    const uri = `data:audio/mpeg;base64,${base64}`;
-    player = createAudioPlayer(uri);
-    player.play();
-    return;
+  const uri =
+    Platform.OS === 'web'
+      ? `data:audio/mpeg;base64,${base64}`
+      : `${cacheDirectory}lyra-response-${Date.now()}.mp3`;
+
+  if (Platform.OS !== 'web') {
+    await writeAsStringAsync(uri, base64, { encoding: 'base64' });
   }
 
-  const path = `${cacheDirectory}lyra-response-${Date.now()}.mp3`;
-  await writeAsStringAsync(path, base64, { encoding: 'base64' });
-  player = createAudioPlayer(path);
+  player = createAudioPlayer(uri);
   player.play();
+
+  await new Promise<void>((resolve) => {
+    let settled = false;
+    const finish = () => {
+      if (settled) return;
+      settled = true;
+      resolve();
+    };
+
+    const timeout = setTimeout(finish, maxWaitMs);
+
+    try {
+      const subscription = player!.addListener('playbackStatusUpdate', (status) => {
+        if (status.didJustFinish) {
+          clearTimeout(timeout);
+          subscription.remove();
+          finish();
+        }
+      });
+    } catch {
+      clearTimeout(timeout);
+      setTimeout(finish, 1500);
+    }
+  });
 }
 
 export async function stopPlayback(): Promise<void> {

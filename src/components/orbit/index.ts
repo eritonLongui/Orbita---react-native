@@ -11,4 +11,5 @@ export { VoiceRecorder } from './VoiceRecorder';
 export { ConversationBubble } from './ConversationBubble';
 export { SettingsSection } from './SettingsSection';
 export { PermissionCard } from './PermissionCard';
+export { LyraEmptyStateCard } from './LyraEmptyStateCard';
 export { ConfirmationModal } from './ConfirmationModal';

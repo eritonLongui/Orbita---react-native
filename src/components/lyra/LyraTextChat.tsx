@@ -6,35 +6,13 @@ import { ChatMessage } from '../../hooks/useLyraTextChat';
 interface LyraTextChatProps {
   messages: ChatMessage[];
   isLoading: boolean;
+  needsCheckIn?: boolean;
 }
 
 function formatMessageTime(date: Date): string {
-  const now = new Date();
-  const isToday = date.toDateString() === now.toDateString();
-  
-  if (isToday) {
-    return date.toLocaleTimeString('pt-BR', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    });
-  }
-  
-  const yesterday = new Date(now);
-  yesterday.setDate(yesterday.getDate() - 1);
-  const isYesterday = date.toDateString() === yesterday.toDateString();
-  
-  if (isYesterday) {
-    return `Ontem ${date.toLocaleTimeString('pt-BR', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    })}`;
-  }
-  
-  return date.toLocaleDateString('pt-BR', { 
-    day: '2-digit', 
-    month: '2-digit',
-    hour: '2-digit', 
-    minute: '2-digit' 
+  return date.toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit',
   });
 }
 
@@ -134,7 +112,33 @@ function TypingIndicator() {
   );
 }
 
-export function LyraTextChat({ messages, isLoading }: LyraTextChatProps) {
+function EmptyChat({ needsCheckIn }: { needsCheckIn?: boolean }) {
+  if (needsCheckIn) {
+    return (
+      <YStack items="center" justify="center" flex={1} px="$4">
+        <Text fontSize={16} color="$textMuted" style={{ textAlign: 'center' }} mb="$2">
+          Hora do check-in
+        </Text>
+        <Text fontSize={13} color="$textSubtle" style={{ textAlign: 'center' }} lineHeight={18}>
+          A Lyra vai te guiar pelas áreas do dia. Responda abaixo para começar.
+        </Text>
+      </YStack>
+    );
+  }
+
+  return (
+    <YStack items="center" justify="center" flex={1} px="$4">
+      <Text fontSize={16} color="$textMuted" style={{ textAlign: 'center' }} mb="$2">
+        Converse com a Lyra por texto
+      </Text>
+      <Text fontSize={13} color="$textSubtle" style={{ textAlign: 'center' }} lineHeight={18}>
+        Digite sua mensagem abaixo para começar
+      </Text>
+    </YStack>
+  );
+}
+
+export function LyraTextChat({ messages, isLoading, needsCheckIn }: LyraTextChatProps) {
   const flatListRef = useRef<FlatList>(null);
 
   // Auto-scroll para a nova mensagem
@@ -181,16 +185,7 @@ export function LyraTextChat({ messages, isLoading }: LyraTextChatProps) {
           minIndexForVisible: 0,
           autoscrollToTopThreshold: 10,
         }}
-        ListEmptyComponent={() => (
-          <YStack items="center" justify="center" flex={1} px="$4">
-            <Text fontSize={16} color="$textMuted" style={{ textAlign: 'center' }} mb="$2">
-              Converse com a Lyra por texto
-            </Text>
-            <Text fontSize={13} color="$textSubtle" style={{ textAlign: 'center' }} lineHeight={18}>
-              Digite sua mensagem abaixo para começar uma conversa
-            </Text>
-          </YStack>
-        )}
+        ListEmptyComponent={() => <EmptyChat needsCheckIn={needsCheckIn} />}
         ListFooterComponent={isLoading ? TypingIndicator : undefined}
       />
     </View>

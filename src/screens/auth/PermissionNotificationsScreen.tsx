@@ -20,9 +20,12 @@ export function PermissionNotificationsScreen({ onComplete }: PermissionNotifica
   return (
     <ScreenWrapper scrollable={false}>
       <PermissionCard
-        title="Notificações"
-        message="Lembretes e insights da sua missão."
+        title="Lembrete gentil"
+        context="Um ritmo leve funciona melhor com um pequeno empurrão no horário certo."
+        message="Notificações avisam na hora do seu check-in com a Lyra. Você pode mudar isso depois no perfil."
         onAllow={handleAllow}
+        onSkip={onComplete}
+        skipLabel="Agora não"
         loading={loading}
       />
     </ScreenWrapper>

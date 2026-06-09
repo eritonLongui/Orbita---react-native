@@ -48,7 +48,7 @@ export function OnboardingProfileScreen({ onComplete }: OnboardingProfileScreenP
               Só mais um passo
             </Text>
             <Text fontSize={14} color="$textMuted" lineHeight={20}>
-              Confirme seus dados para personalizar a missão.
+              Confirme seus dados. As áreas abaixo são as mesmas cinco da sua órbita.
             </Text>
           </YStack>
 
@@ -94,7 +94,7 @@ export function OnboardingProfileScreen({ onComplete }: OnboardingProfileScreenP
 
           <YStack gap="$3">
             <Text fontSize={13} fontWeight="600" color="$textMuted">
-              O que quer melhorar? (opcional)
+              O que quer acompanhar com mais atenção? (opcional)
             </Text>
             <XStack gap="$2" flexWrap="wrap" mt="$1">
               {ORBIT_AREAS.map((area) => (
@@ -111,7 +111,7 @@ export function OnboardingProfileScreen({ onComplete }: OnboardingProfileScreenP
           <TermsCheckbox
             checked={acceptedTerms}
             onToggle={() => setAcceptedTerms((prev) => !prev)}
-            label="Concordo com os termos e entendo que o Orbita não substitui apoio profissional."
+            label="Concordo com os termos e entendo que a Orbita não substitui apoio profissional."
           />
         </YStack>
 
