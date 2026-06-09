@@ -1,4 +1,3 @@
-import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 import { readAsStringAsync } from 'expo-file-system/legacy';
 import { Platform } from 'react-native';
 
@@ -20,6 +19,7 @@ function mimeFromUri(uri: string): string {
 }
 
 type ImagePickerModule = typeof import('expo-image-picker');
+type ImageManipulatorModule = typeof import('expo-image-manipulator');
 
 function loadImagePicker(): ImagePickerModule {
   try {
@@ -32,36 +32,70 @@ function loadImagePicker(): ImagePickerModule {
   }
 }
 
+function loadImageManipulator(): ImageManipulatorModule | null {
+  try {
+    return require('expo-image-manipulator') as ImageManipulatorModule;
+  } catch (e) {
+    console.warn('expo-image-manipulator unavailable:', e);
+    return null;
+  }
+}
+
+async function readOriginalBase64(
+  uri: string,
+  sourceMime?: string | null,
+): Promise<{ base64: string; mimeType: string; displayUri: string }> {
+  const normalized = (sourceMime ?? mimeFromUri(uri)).toLowerCase().split(';')[0].trim();
+  const mimeType = normalized.startsWith('image/') ? normalized : mimeFromUri(uri);
+  const base64 = await readAsStringAsync(uri, { encoding: 'base64' });
+
+  return {
+    base64,
+    mimeType,
+    displayUri: `data:${mimeType};base64,${base64}`,
+  };
+}
+
 async function encodeForLyraChat(
   uri: string,
   sourceMime?: string | null,
 ): Promise<{ base64: string; mimeType: string; displayUri: string }> {
   const normalized = (sourceMime ?? mimeFromUri(uri)).toLowerCase().split(';')[0].trim();
   const usePng = normalized === 'image/png' || normalized === 'image/gif';
+  const manipulator = loadImageManipulator();
 
-  const result = await manipulateAsync(
-    uri,
-    [{ resize: { width: MAX_IMAGE_WIDTH } }],
-    {
-      compress: usePng ? 1 : 0.82,
-      format: usePng ? SaveFormat.PNG : SaveFormat.JPEG,
-      base64: true,
-    },
-  );
+  if (manipulator) {
+    try {
+      const { manipulateAsync, SaveFormat } = manipulator;
+      const result = await manipulateAsync(
+        uri,
+        [{ resize: { width: MAX_IMAGE_WIDTH } }],
+        {
+          compress: usePng ? 1 : 0.82,
+          format: usePng ? SaveFormat.PNG : SaveFormat.JPEG,
+          base64: true,
+        },
+      );
 
-  let base64 = result.base64 ?? null;
-  if (!base64 && Platform.OS !== 'web') {
-    base64 = await readAsStringAsync(result.uri, { encoding: 'base64' });
+      let base64 = result.base64 ?? null;
+      if (!base64 && Platform.OS !== 'web') {
+        base64 = await readAsStringAsync(result.uri, { encoding: 'base64' });
+      }
+
+      if (base64) {
+        const mimeType = usePng ? 'image/png' : 'image/jpeg';
+        return {
+          base64,
+          mimeType,
+          displayUri: `data:${mimeType};base64,${base64}`,
+        };
+      }
+    } catch (e) {
+      console.warn('Image manipulator failed, using original file:', e);
+    }
   }
 
-  if (!base64) {
-    throw new Error('Não foi possível processar a imagem.');
-  }
-
-  const mimeType = usePng ? 'image/png' : 'image/jpeg';
-  const displayUri = `data:${mimeType};base64,${base64}`;
-
-  return { base64, mimeType, displayUri };
+  return readOriginalBase64(uri, sourceMime);
 }
 
 export async function pickChatImage(): Promise<PickedChatImage | null> {
@@ -76,7 +110,6 @@ export async function pickChatImage(): Promise<PickedChatImage | null> {
     mediaTypes: ['images'],
     allowsEditing: false,
     quality: 1,
-    copyToCacheDirectory: true,
   };
 
   if (Platform.OS === 'ios' && 'UIImagePickerPreferredAssetRepresentationMode' in ImagePicker) {

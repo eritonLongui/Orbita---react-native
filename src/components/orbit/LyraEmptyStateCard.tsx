@@ -2,6 +2,7 @@ import React from 'react';
 import { Text, YStack } from 'tamagui';
 import { TalkToLyraButton } from '../lyra/TalkToLyraButton';
 import { OrbitaCard } from '../ui/OrbitaCard';
+import { TitleText } from '../ui/TitleText';
 
 interface LyraEmptyStateCardProps {
   title: string;
@@ -12,14 +13,14 @@ interface LyraEmptyStateCardProps {
 export function LyraEmptyStateCard({ title, description, onPress }: LyraEmptyStateCardProps) {
   return (
     <OrbitaCard>
-      <YStack gap="$3">
-        <Text fontSize={16} fontWeight="700" color="$text">
+      <YStack gap="$3" items="center" width="100%">
+        <TitleText size="sm" text="center">
           {title}
-        </Text>
-        <Text fontSize={14} color="$textMuted" lineHeight={20}>
+        </TitleText>
+        <Text fontSize={14} color="$textMuted" lineHeight={20} text="center">
           {description}
         </Text>
-        <TalkToLyraButton onPress={onPress} />
+        <TalkToLyraButton variant="primary" fullWidth onPress={onPress} />
       </YStack>
     </OrbitaCard>
   );

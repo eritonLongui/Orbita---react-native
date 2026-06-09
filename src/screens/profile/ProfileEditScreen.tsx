@@ -1,8 +1,9 @@
 import { Camera } from 'phosphor-react-native';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, Pressable, StyleSheet, View } from 'react-native';
-import { Input, Text, YStack } from 'tamagui';
+import { Text, YStack } from 'tamagui';
 import { SettingsBackHeader } from '../../components/settings/SettingsBackHeader';
+import { GlassInput } from '../../components/ui/GlassInput';
 import { OrbitaCard } from '../../components/ui/OrbitaCard';
 import { PrimaryButton } from '../../components/ui/PrimaryButton';
 import { ScreenWrapper } from '../../components/ui/ScreenWrapper';
@@ -135,16 +136,10 @@ export function ProfileEditScreen() {
           <Text fontSize={14} fontWeight="600" color="$textMuted">
             Nome de exibição
           </Text>
-          <Input
+          <GlassInput
             value={fullName}
             onChangeText={setFullName}
-            bg="$glassButton"
-            borderColor="$glassBorder"
-            rounded="$md"
-            color="$text"
             placeholder="Seu nome"
-            placeholderTextColor="$textSubtle"
-            size="$4"
           />
         </YStack>
 

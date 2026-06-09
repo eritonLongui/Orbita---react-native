@@ -23,6 +23,7 @@ import { ORBIT_STATUS_LABELS, orbitStatusColor } from '../../constants/orbitArea
 import { themeColors } from '../../constants/theme';
 import { OrbitAreaDetail, PillarType } from '../../types';
 import { OrbitaCard } from '../ui/OrbitaCard';
+import { TitleText } from '../ui/TitleText';
 import { OrbitAreaHistoryChart } from './OrbitAreaHistoryChart';
 
 const AREA_ICONS = {
@@ -72,18 +73,18 @@ export function OrbitAreaDetailCard({ detail }: OrbitAreaDetailCardProps) {
             accessibilityLabel={`${detail.label}, nota ${detail.score}`}
           >
             <XStack justify="space-between" items="center" gap="$3">
-              <XStack flex={1} items="center" gap="$2.5">
+              <XStack flex={1} items={expanded ? 'flex-start' : 'center'} gap="$2.5">
                 <AreaIcon size={22} color={themeColors.primary} />
-                <YStack flex={1} gap={expanded ? '$2.5' : 0}>
-                  <Text fontSize={18} fontWeight="800" color="$text">
+                <YStack flex={1} gap={expanded ? '$1' : 0}>
+                  <TitleText size="md" lineHeight={22}>
                     {detail.label}
-                  </Text>
+                  </TitleText>
                   {expanded ? (
                     <Animated.View
                       entering={FadeIn.duration(240).easing(EXPAND_EASING)}
                       exiting={FadeOut.duration(180)}
                     >
-                      <Text fontSize={13} color="$textMuted" lineHeight={18}>
+                      <Text fontSize={13} color="$textMuted" lineHeight={18} mt={0}>
                         {detail.description}
                       </Text>
                     </Animated.View>
@@ -119,16 +120,22 @@ export function OrbitAreaDetailCard({ detail }: OrbitAreaDetailCardProps) {
             >
               <YStack gap="$3">
                 <InnerSection>
-                  <YStack gap="$3">
+                  <YStack gap="$3" items="center">
                     <Text
                       fontSize={12}
                       fontWeight="700"
                       letterSpacing={1.2}
+                      text="center"
                       style={{ color: themeColors.textMuted }}
                     >
                       ESTADO
                     </Text>
-                    <Text fontSize={16} fontWeight="700" style={{ color: statusColor }}>
+                    <Text
+                      fontSize={16}
+                      fontWeight="700"
+                      text="center"
+                      style={{ color: statusColor }}
+                    >
                       {ORBIT_STATUS_LABELS[detail.status]}
                     </Text>
                   </YStack>

@@ -5,7 +5,7 @@ import React, { useMemo } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import { themeColors } from '../../constants/theme';
 
-type LyraTabOrbSize = 'tab' | 'sm';
+type LyraTabOrbSize = 'tab' | 'sm' | 'hero';
 
 const SIZE_PRESETS: Record<
   LyraTabOrbSize,
@@ -13,6 +13,7 @@ const SIZE_PRESETS: Record<
 > = {
   tab: { halo: 58, orb: 44, eyeW: 4, eyeH: 11, eyeGap: 6 },
   sm: { halo: 32, orb: 24, eyeW: 2.5, eyeH: 7, eyeGap: 3 },
+  hero: { halo: 200, orb: 154, eyeW: 14, eyeH: 34, eyeGap: 18 },
 };
 
 export const LYRA_TAB_ORB_SIZE = SIZE_PRESETS.tab.halo;
@@ -55,8 +56,8 @@ export function LyraTabOrb({ size = 'tab' }: LyraTabOrbProps) {
           shadowColor: themeColors.primaryGlow,
           shadowOffset: { width: 0, height: 0 },
           shadowOpacity: 0.85,
-          shadowRadius: size === 'tab' ? 14 : 10,
-          elevation: size === 'tab' ? 8 : 6,
+          shadowRadius: size === 'hero' ? 40 : size === 'tab' ? 14 : 10,
+          elevation: size === 'hero' ? 14 : size === 'tab' ? 8 : 6,
         },
         pulseRing: {
           position: 'absolute',

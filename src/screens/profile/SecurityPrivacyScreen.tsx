@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Alert } from 'react-native';
-import { Input, Text, YStack } from 'tamagui';
+import { Text, YStack } from 'tamagui';
 import { ConfirmationModal } from '../../components/orbit';
 import { SettingsBackHeader } from '../../components/settings/SettingsBackHeader';
+import { GlassInput } from '../../components/ui/GlassInput';
 import { OrbitaCard } from '../../components/ui/OrbitaCard';
 import { PrimaryButton } from '../../components/ui/PrimaryButton';
 import { ScreenWrapper } from '../../components/ui/ScreenWrapper';
@@ -117,15 +118,10 @@ export function SecurityPrivacyScreen() {
             setDeleteConfirmText('');
           }}
         >
-          <Input
+          <GlassInput
             value={deleteConfirmText}
             onChangeText={setDeleteConfirmText}
             placeholder="Digite EXCLUIR"
-            placeholderTextColor="$textSubtle"
-            bg="$glassButton"
-            borderColor="$glassBorder"
-            color="$text"
-            rounded="$md"
             autoCapitalize="characters"
           />
         </ConfirmationModal>

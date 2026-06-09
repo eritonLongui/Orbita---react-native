@@ -7,7 +7,7 @@ import { themeColors } from '../../constants/theme';
 interface GlassCardProps {
   children: React.ReactNode;
   highlighted?: boolean;
-  padding?: boolean;
+  padding?: boolean | 'relaxed';
   /** Preenche altura do container pai (cards lado a lado) */
   fill?: boolean;
   /** Visual mais leve — útil em cards expansíveis */
@@ -41,7 +41,12 @@ export function GlassCard({
           Platform.OS === 'web' && subtle && styles.webSubtleOverlay,
         ]}
       />
-      <YStack flex={fill ? 1 : undefined} p={padding ? '$4' : 0} gap="$3" position="relative">
+      <YStack
+        flex={fill ? 1 : undefined}
+        p={padding === 'relaxed' ? '$5' : padding ? '$4' : 0}
+        gap="$3"
+        position="relative"
+      >
         {children}
       </YStack>
     </View>
@@ -59,7 +64,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   highlighted: {
-    borderColor: 'rgba(75, 139, 255, 0.45)',
+    borderColor: 'rgba(75, 139, 255, 0.65)',
     shadowColor: themeColors.primary,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.2,
@@ -71,7 +76,7 @@ const styles = StyleSheet.create({
     backgroundColor: themeColors.glass,
   },
   subtle: {
-    borderColor: 'rgba(255, 255, 255, 0.06)',
+    borderColor: 'rgba(255, 255, 255, 0.16)',
   },
   subtleOverlay: {
     backgroundColor: 'rgba(8, 8, 8, 0.84)',

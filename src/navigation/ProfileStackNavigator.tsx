@@ -5,6 +5,7 @@ import { LyraSettingsScreen } from '../screens/profile/LyraSettingsScreen';
 import { PermissionsSettingsScreen } from '../screens/profile/PermissionsSettingsScreen';
 import { ProfileEditScreen } from '../screens/profile/ProfileEditScreen';
 import { ProfileHomeScreen } from '../screens/profile/ProfileHomeScreen';
+import { LoginTestScreen } from '../screens/profile/LoginTestScreen';
 import { OnboardingTestScreen } from '../screens/profile/OnboardingTestScreen';
 import { SecurityPrivacyScreen } from '../screens/profile/SecurityPrivacyScreen';
 import { ProfileStackParamList } from './types';
@@ -23,6 +24,11 @@ export function ProfileStackNavigator() {
       <Stack.Screen
         name="OnboardingTest"
         component={OnboardingTestScreen}
+        options={{ presentation: 'fullScreenModal', animation: 'slide_from_bottom' }}
+      />
+      <Stack.Screen
+        name="LoginTest"
+        component={LoginTestScreen}
         options={{ presentation: 'fullScreenModal', animation: 'slide_from_bottom' }}
       />
     </Stack.Navigator>

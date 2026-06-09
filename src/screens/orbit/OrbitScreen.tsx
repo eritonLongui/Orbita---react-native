@@ -13,6 +13,7 @@ import {
 } from '../../components/orbit';
 import { InsightsCarousel } from '../../components/orbit/InsightsCarousel';
 import { SectionTitle } from '../../components/ui/SectionTitle';
+import { TitleText } from '../../components/ui/TitleText';
 import { GlassChip } from '../../components/ui/GlassChip';
 import { GradientText } from '../../components/ui/GradientText';
 import { InfoTooltip } from '../../components/ui/InfoTooltip';
@@ -72,9 +73,7 @@ export function OrbitScreen() {
   return (
     <ScreenWrapper tabBarOffset>
       <YStack gap="$5" pb="$14" pt="$4" width="100%">
-        <Text fontSize={28} fontWeight="800" color="$text">
-          Minha Órbita
-        </Text>
+        <TitleText size="screen">Minha Órbita</TitleText>
 
         {loading ? (
           <YStack py="$10" items="center">
@@ -100,7 +99,7 @@ export function OrbitScreen() {
                     <Text
                       fontSize={13}
                       fontWeight="800"
-                      letterSpacing={1.2}
+                      letterSpacing={1}
                       color="$text"
                       text="center"
                     >
@@ -148,15 +147,15 @@ export function OrbitScreen() {
                   <Text
                     fontSize={11}
                     fontWeight="800"
-                    letterSpacing={1.4}
+                    letterSpacing={1}
                     style={{ color: 'rgba(255, 255, 255, 0.8)' }}
                   >
                     EVOLUÇÃO
                   </Text>
-                  <Text fontSize={20} fontWeight="800" color="white" lineHeight={26}>
+                  <TitleText size="lg" color="white" lineHeight={26}>
                     {evolutionPercent >= 0 ? '+' : ''}
                     {evolutionPercent}% desde o início
-                  </Text>
+                  </TitleText>
                   <Text fontSize={14} lineHeight={20} style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
                     Como sua órbita mudou ao longo do tempo
                   </Text>

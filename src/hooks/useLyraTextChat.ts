@@ -1,7 +1,6 @@
 import { useCallback, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getLyraVoiceConfigFromProfile } from '../constants/lyraVoice';
-import { pickChatImage } from '../services/chatImage';
 import { buildCheckInOpening } from '../services/checkIn';
 import { sendToLyra } from '../services/conversation';
 import { useAuth } from '../providers/AuthProvider';
@@ -151,6 +150,7 @@ export function useLyraTextChat(options?: UseLyraTextChatOptions) {
   const pickImage = useCallback(async () => {
     try {
       setError(null);
+      const { pickChatImage } = await import('../services/chatImage');
       return await pickChatImage();
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Não foi possível selecionar a foto.';

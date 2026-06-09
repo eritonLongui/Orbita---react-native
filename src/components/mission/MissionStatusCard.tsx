@@ -4,6 +4,7 @@ import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Text, YStack } from 'tamagui';
 import { themeColors } from '../../constants/theme';
+import { TitleText } from '../ui/TitleText';
 
 interface MissionStatusCardProps {
   title: string;
@@ -35,14 +36,14 @@ export function MissionStatusCard({ title, description, onPress }: MissionStatus
           <Text
             fontSize={11}
             fontWeight="800"
-            letterSpacing={1.4}
+            letterSpacing={1}
             style={{ color: 'rgba(255, 255, 255, 0.8)' }}
           >
             STATUS DA MISSÃO
           </Text>
-          <Text fontSize={22} fontWeight="800" color="white" lineHeight={28}>
+          <TitleText size="card" color="white" lineHeight={28} weight="700">
             {title}
-          </Text>
+          </TitleText>
           <Text fontSize={14} lineHeight={21} style={{ color: 'rgba(255, 255, 255, 0.92)' }}>
             {description}
           </Text>

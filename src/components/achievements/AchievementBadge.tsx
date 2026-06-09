@@ -26,6 +26,7 @@ import { StyleSheet, View } from 'react-native';
 import { Text, YStack } from 'tamagui';
 import { AchievementDef } from '../../constants/achievements';
 import { themeColors } from '../../constants/theme';
+import { TitleText } from '../ui/TitleText';
 
 const ICON_MAP: Record<string, PhosphorIcon> = {
   RocketLaunch,
@@ -80,9 +81,9 @@ export function AchievementBadge({ definition, unlocked }: AchievementBadgeProps
           <View style={styles.unlockedIconCircle}>
             <Icon size={28} color="white" weight="fill" />
           </View>
-          <Text fontSize={14} fontWeight="700" color="white" text="center">
-            {definition.title}
-          </Text>
+          <TitleText size="sm" weight="700" color="white" text="center">
+            {definition.title.toUpperCase()}
+          </TitleText>
           <Text
             fontSize={12}
             fontWeight="500"
@@ -104,14 +105,14 @@ export function AchievementBadge({ definition, unlocked }: AchievementBadgeProps
         <View style={styles.lockedIconCircle}>
           <Lock size={20} color="rgba(255, 255, 255, 0.45)" />
         </View>
-        <Text
-          fontSize={14}
-          fontWeight="700"
+        <TitleText
+          size="sm"
+          weight="700"
           text="center"
           style={{ color: 'rgba(255, 255, 255, 0.72)' }}
         >
-          {definition.title}
-        </Text>
+          {definition.title.toUpperCase()}
+        </TitleText>
         <Text
           fontSize={12}
           fontWeight="500"

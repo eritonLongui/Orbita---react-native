@@ -1,37 +1,119 @@
 # Orbita
 
-App mobile (React Native / Expo) para acompanhar sua órbita de bem-estar e conversar com a **Lyra**, copiloto por voz e texto.
+**Seu centro de comando emocional** — app mobile que ajuda você a equilibrar cinco dimensões da vida (Descanso, Energia, Ritmo, Nutrição e Bem-estar) com a **Lyra**, inteligência da nave por voz e texto.
 
-**Stack:** Expo 56 · Tamagui · Firebase Auth · Supabase · Edge Function `lyra-chat`
+---
+
+## O que é
+
+A **Órbita** é um espaço dedicado ao bem-estar emocional. Cada **tripulante** representa uma dimensão importante da sua vida. Juntos, desenvolvem consciência, equilíbrio e qualidade de vida.
+
+A **Lyra** acompanha sua trajetória, registra progressos e oferece suporte personalizado durante a **missão** do dia — da conversa ao insight, da análise de padrões às micro-tarefas sugeridas.
+
+### Proposta de valor
+
+> Toda jornada precisa de uma tripulação. A Órbita traduz seu momento em clareza, direção e continuidade — sem culpa, sem gamificação punitiva.
+
+### Diferencial (IA)
+
+| Etapa | O que a Lyra faz |
+|-------|------------------|
+| **Conversa** | Check-in guiado por voz ou texto nas 5 dimensões |
+| **Compreensão** | OpenAI (servidor) interpreta respostas e contexto |
+| **Scores** | Atualiza o radar da órbita por área |
+| **Insights** | Gera recomendações personalizadas por pilar |
+| **Tarefas** | Sugere micro-ações do dia na Missão |
+| **Padrões** | Histórico e evolução ao longo do tempo |
+
+A chave da OpenAI **nunca** fica no celular — só na Edge Function `lyra-chat` (Supabase).
+
+---
+
+## Plataforma e stack
+
+| Camada | Tecnologia |
+|--------|------------|
+| **App** | React Native 0.85 · Expo 56 · TypeScript |
+| **UI** | Tamagui · tema dark · glass morphism |
+| **Tipografia** | Space Grotesk (títulos) · Inter (corpo) |
+| **Navegação** | React Navigation — tabs + stacks |
+| **Auth** | Firebase Auth + Google Sign-In |
+| **Dados** | Supabase (Postgres + RLS) |
+| **IA** | Supabase Edge Function `lyra-chat` → OpenAI |
+| **Voz** | OpenAI TTS + `expo-audio` / `expo-speech` |
+| **Build** | EAS Build · dev client nativo |
+
+**Importante:** não use **Expo Go** — login Google, pager do onboarding, manipulação de imagem e áudio exigem **dev build** (`npm run ios` / `npm run android` ou APK EAS).
+
+---
+
+## Jornada do usuário
+
+```mermaid
+flowchart TD
+  Splash[Splash animada] --> Login[Login Google]
+  Login --> Onboarding[Onboarding 4 telas]
+  Onboarding --> Tabs[5 tabs]
+  Tabs --> Mission[Missão — hub do dia]
+  Tabs --> Orbit[Órbita — radar]
+  Tabs --> Lyra[Lyra — check-in IA]
+  Tabs --> Achievements[Conquistas]
+  Tabs --> Profile[Perfil]
+```
+
+### Onboarding (4 passos)
+
+1. **Toda jornada precisa de uma tripulação** — proposta de valor + logo mark  
+2. **Sua tripulação** — radar das 5 dimensões  
+3. **Lyra, a inteligência da nave** — papel da coach de IA  
+4. **Conecte-se à sua tripulação** — nome, foco opcional, termos → **Siga viagem**
+
+### Loop diário
+
+```
+Manhã     → Missão (estado + CTA)
+Check-in  → Lyra (voz ou texto)
+Feedback  → Missão / Órbita (scores + insight)
+Rotina    → Tarefas do dia + conquistas
+```
+
+### Papéis das tabs
+
+| Tab | Papel |
+|-----|-------|
+| **Missão** | Painel do dia — saudação, estado da órbita, tarefas |
+| **Órbita** | Radar e detalhe por dimensão (scores, gráfico 7d, recomendação Lyra) |
+| **Lyra** | Ação principal — conversa, check-in estruturado ou livre |
+| **Conquistas** | Marcos da jornada |
+| **Perfil** | Conta, Lyra, permissões, área de testes |
+
+Documentação viva: [`docs/USER_JOURNEY.md`](docs/USER_JOURNEY.md) · skill Cursor: `.cursor/skills/orbita-journey/`
 
 ---
 
 ## Escolha seu caminho
 
-| Objetivo | Vá para |
+| Objetivo | Caminho |
 |----------|---------|
-| Só testar o app (professor/colega) | [Caminho A — Instalar APK](#caminho-a--só-testar) |
-| Desenvolver no simulador/emulador | [Caminho B — Dev local](#caminho-b--desenvolver-localmente) |
-| Deploy backend / build EAS | [Caminho C — Mantenedor](#caminho-c--mantenedor) |
+| Só testar (sem clonar) | [Caminho A — APK EAS](#caminho-a--só-testar-apk) |
+| Dev no simulador/emulador | [Caminho B — Dev local](#caminho-b--desenvolver-localmente) |
+| Deploy backend / novo build | [Caminho C — Mantenedor](#caminho-c--mantenedor) |
+| Apresentação para o time | [`docs/APRESENTACAO_EQUIPE.md`](docs/APRESENTACAO_EQUIPE.md) |
 
 ---
 
-## Caminho A — Só testar
+## Caminho A — Só testar (APK)
 
-Não precisa clonar o repositório nem configurar `.env`.
-
-1. Abra os **builds do projeto** no Expo:  
-   https://expo.dev/accounts/marcomendessv/projects/Orbita/builds
+1. Abra os builds do projeto:  
+   **https://expo.dev/accounts/marcomendessv/projects/Orbita/builds**
 2. Baixe o APK Android mais recente com profile **preview** (status *finished*).
-3. Instale no celular Android e abra o app.
+3. Instale no celular Android.
 4. Toque em **Continuar com Google**.
 
-O login Google no APK de preview já usa o certificado EAS cadastrado no Firebase — funciona para qualquer testador.
+O APK de **preview** é assinado com o certificado EAS cadastrado no Firebase — **login Google funciona para qualquer pessoa** que instalar esse APK, sem configurar SHA-1 no notebook dela.
 
-**iOS em iPhone físico** exige conta Apple Developer (US$ 99/ano). Alternativas:
-
-- Build **preview-simulator** no EAS (só Simulador iOS no Mac).
-- Dev local no Mac: [Caminho B](#caminho-b--desenvolver-localmente).
+**iOS (simulador no Mac):** `npm run setup:ios` → `npm start` + `npm run ios`  
+**iOS (iPhone físico):** build EAS `preview` ou conta Apple Developer.
 
 ---
 
@@ -39,44 +121,49 @@ O login Google no APK de preview já usa o certificado EAS cadastrado no Firebas
 
 ### Pré-requisitos
 
-- **Node.js 20+** e npm
-- **iOS (Mac):** Xcode + Simulador iOS
-- **Android (opcional):** Android Studio + emulador
+| Plataforma | O que instalar |
+|------------|----------------|
+| **Todos** | Node.js **20+**, npm, Git |
+| **iOS (Mac)** | Xcode + Simulador iOS + CocoaPods (`sudo gem install cocoapods`) |
+| **Android** | Android Studio + SDK + emulador Android |
 
-### Setup automático
+### Setup automático (recomendado)
 
 ```bash
 git clone https://github.com/eritonLongui/Orbita---react-native.git
 cd Orbita---react-native
 
-npm run setup          # instala dependências + valida backend
-npm run setup:ios      # primeira vez: gera pasta ios/
-# ou: npm run setup:android
+npm run setup              # deps + valida backend
+npm run setup:ios          # primeira vez no Mac: gera pasta ios/
+# ou: npm run setup:android   # primeira vez: gera pasta android/
+# ou: npm run setup:all       # ambos
 ```
 
-### Rodar o app
+### Rodar
 
-Terminal 1:
+**Terminal 1:**
 
 ```bash
 npm start
 ```
 
-Terminal 2:
+**Terminal 2:**
 
 ```bash
-npm run ios       # simulador iOS (Mac)
-# ou: npm run android
+npm run ios       # Simulador iOS (Mac)
+# ou:
+npm run android   # Emulador Android
 ```
 
-### Importante
+### Notas importantes
 
-- **Não precisa de `.env`** — chaves públicas em [`src/config/publicEnv.ts`](src/config/publicEnv.ts).
-- **Não use Expo Go** — login Google exige dev build nativo.
-- Se `npx` não funcionar no terminal, use sempre `npm run <comando>`.
-- Login Google em **Android dev local**: cada máquina pode precisar do SHA-1 no Firebase. Veja [`docs/GOOGLE_LOGIN.md`](docs/GOOGLE_LOGIN.md).
+- **Sem `.env` obrigatório** — chaves públicas em [`src/config/publicEnv.ts`](src/config/publicEnv.ts).
+- **Não use Expo Go** — use dev client (`npm run ios` / `android`).
+- **Android dev local:** cada máquina pode precisar cadastrar SHA-1 no Firebase → [`docs/GOOGLE_LOGIN.md`](docs/GOOGLE_LOGIN.md).
+- **iOS simulador:** costuma funcionar para todo o time após `setup:ios`.
+- **Preview de telas:** Perfil → Área de testes → Login / Onboarding.
 
-### Só validar (sem instalar)
+### Só validar ambiente
 
 ```bash
 npm run setup:check
@@ -86,37 +173,35 @@ npm run setup:check
 
 ## Caminho C — Mantenedor
 
-Para publicar migrations, Lyra no Supabase ou gerar APK/IPA novo.
+### Backend (Lyra na nuvem)
 
-1. Copie [`.env.example`](.env.example) → `.env` (local, gitignored):
+Copie [`.env.example`](.env.example) → `.env` (gitignored, só na sua máquina):
 
-   ```
-   SUPABASE_ACCESS_TOKEN=sbp_...
-   SUPABASE_PROJECT_REF=yifgbmrpnpljjrmjwwfq
-   OPENAI_API_KEY=sk-...
-   ```
+```env
+SUPABASE_ACCESS_TOKEN=sbp_...
+SUPABASE_PROJECT_REF=yifgbmrpnpljjrmjwwfq
+OPENAI_API_KEY=sk-...
+```
 
-2. Deploy do backend:
+```bash
+npm run deploy:supabase
+npm run validate:supabase
+```
 
-   ```bash
-   npm run deploy:supabase
-   npm run validate:supabase
-   ```
+### Gerar APK / IPA para testadores
 
-3. Build instalável (EAS):
+```bash
+npm run build:preview:android          # APK (qualquer Android)
+npm run build:preview:ios-simulator    # Simulador iOS (Mac)
+```
 
-   ```bash
-   npm run build:preview:android
-   npm run build:preview:ios-simulator   # Mac simulador, sem conta Apple paga
-   ```
+Ou interativo:
 
-4. Credenciais Android (SHA-1):
+```bash
+npm run build:preview
+```
 
-   ```bash
-   npm run eas:credentials:android
-   ```
-
-Documentação completa: [`docs/PRODUCTION.md`](docs/PRODUCTION.md)
+Cadastre o **SHA-1 do build EAS** no Firebase (uma vez) — veja [`docs/PRODUCTION.md`](docs/PRODUCTION.md).
 
 ---
 
@@ -129,15 +214,14 @@ Documentação completa: [`docs/PRODUCTION.md`](docs/PRODUCTION.md)
 | `npm run setup:android` | Setup + `expo prebuild` Android |
 | `npm run setup:all` | Setup + prebuild iOS e Android |
 | `npm run setup:check` | Só checagens, sem instalar |
-| `npm start` | Metro bundler |
-| `npm run start:clean` | Metro com cache limpo |
-| `npm run ios` | Build e run no simulador iOS |
-| `npm run android` | Build e run no Android |
-| `npm run validate:supabase` | Testa API e `lyra-chat` na nuvem |
+| `npm start` | Metro bundler (dev client) |
+| `npm run ios` | Build + run simulador iOS |
+| `npm run android` | Build + run emulador Android |
+| `npm run validate:supabase` | Testa API e `lyra-chat` |
 | `npm run build:preview:android` | APK EAS para testadores |
 | `npm run build:preview:ios-simulator` | Build iOS simulador (EAS) |
-| `npm run auth:fingerprints` | SHA-1 local para Firebase (dev Android) |
-| `npm run reset:native` | Regenera pastas `ios/` e `android/` |
+| `npm run auth:fingerprints` | SHA-1 local (dev Android) |
+| `npm run reset:native` | Regenera `ios/` e `android/` |
 
 ---
 
@@ -145,22 +229,34 @@ Documentação completa: [`docs/PRODUCTION.md`](docs/PRODUCTION.md)
 
 | Arquivo | Conteúdo |
 |---------|----------|
-| [`docs/SECRETS.md`](docs/SECRETS.md) | Variáveis de ambiente e quem precisa de quê |
+| [`docs/APRESENTACAO_EQUIPE.md`](docs/APRESENTACAO_EQUIPE.md) | Roteiro para apresentação do projeto |
+| [`docs/APRESENTACAO_EQUIPE.md`](docs/APRESENTACAO_EQUIPE.md) | Roteiro para apresentação do time |
+| [`docs/USER_JOURNEY.md`](docs/USER_JOURNEY.md) | Jornada, narrativa e backlog UX |
 | [`docs/GOOGLE_LOGIN.md`](docs/GOOGLE_LOGIN.md) | Login Google e `DEVELOPER_ERROR` |
 | [`docs/PRODUCTION.md`](docs/PRODUCTION.md) | Distribuição, EAS e usuários finais |
-| [`docs/USER_JOURNEY.md`](docs/USER_JOURNEY.md) | Jornada do usuário, narrativa e backlog UX |
+| [`docs/SECRETS.md`](docs/SECRETS.md) | Variáveis de ambiente |
 
 ---
 
-## Estrutura resumida
+## Estrutura do projeto
 
 ```
 src/
-  screens/     # Telas (auth, mission, orbit, lyra, profile)
-  components/  # UI e blocos reutilizáveis
-  config/      # publicEnv.ts (chaves públicas)
-  services/    # Firebase, Supabase, perfil
-supabase/      # Migrations e Edge Function lyra-chat
-firebase/      # Cloud Functions
-scripts/       # Setup, deploy e validação
+  screens/       # auth, onboarding, mission, orbit, lyra, achievements, profile
+  components/    # UI, Lyra, órbita, missão, navegação
+  services/      # Firebase, Supabase, conversa, tarefas, jornada
+  hooks/         # Lyra, órbita, conquistas, missão
+  constants/     # tema, copy, pilares, tipografia
+  config/        # publicEnv.ts
+supabase/
+  migrations/    # Schema Postgres
+  functions/     # lyra-chat (Edge Function)
+scripts/         # setup.sh, deploy, validação, run-ios
+assets/          # ícones, logos, login-planet.png
 ```
+
+---
+
+## Licença
+
+Ver [`LICENSE`](LICENSE).

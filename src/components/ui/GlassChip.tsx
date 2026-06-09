@@ -16,7 +16,7 @@ export function GlassChip({ label, selected = false, onPress }: GlassChipProps) 
       rounded={999}
       bg={selected ? '$primaryBg' : '$glassButton'}
       borderWidth={1}
-      borderColor={selected ? '$primary' : 'rgba(255, 255, 255, 0.14)'}
+      borderColor={selected ? '$primary' : '$glassBorderStrong'}
       pressStyle={{ opacity: 0.85 }}
       onPress={onPress}
     >

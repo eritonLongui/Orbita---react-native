@@ -16,6 +16,10 @@ interface ScreenWrapperProps {
   tabBarOffset?: boolean;
   /** Menos padding inferior — input de chat colado acima da tab bar */
   compactBottom?: boolean;
+  /** Sem inset superior — páginas embutidas em pager horizontal */
+  skipTopInset?: boolean;
+  /** Footer fixo no fundo — sem fade inferior nem padding extra (onboarding, auth) */
+  dockedFooter?: boolean;
 }
 
 export function ScreenWrapper({
@@ -24,17 +28,21 @@ export function ScreenWrapper({
   padded = true,
   tabBarOffset = false,
   compactBottom = false,
+  skipTopInset = false,
+  dockedFooter = false,
 }: ScreenWrapperProps) {
   const insets = useSafeAreaInsets();
 
-  const paddingTop = padded ? insets.top + 12 : 0;
+  const paddingTop = padded && !skipTopInset ? insets.top + 12 : 0;
   const baseBottom = padded ? Math.max(insets.bottom, 12) : insets.bottom;
-  const tabBarSpace = tabBarOffset ? TAB_BAR_HEIGHT : padded ? 16 : 0;
+  const tabBarSpace = tabBarOffset ? TAB_BAR_HEIGHT : padded && !dockedFooter ? 16 : 0;
   const chatInputBottomGap = 12;
-  const paddingBottom = compactBottom
-    ? insets.bottom +
-      (tabBarOffset ? TAB_BAR_FLOATING_CLEARANCE + chatInputBottomGap : baseBottom)
-    : baseBottom + tabBarSpace + BOTTOM_EDGE_FADE_HEIGHT;
+  const paddingBottom = dockedFooter
+    ? 0
+    : compactBottom
+      ? insets.bottom +
+        (tabBarOffset ? TAB_BAR_FLOATING_CLEARANCE + chatInputBottomGap : baseBottom)
+      : baseBottom + tabBarSpace + BOTTOM_EDGE_FADE_HEIGHT;
 
   const content = (
     <YStack flex={1} px={padded ? '$4' : 0} pt={paddingTop} pb={paddingBottom}>
@@ -49,13 +57,13 @@ export function ScreenWrapper({
       <StatusBar style="light" />
       <View style={{ flex: 1 }}>
         {scrollable ? (
-          <ScrollView flex={1} showsVerticalScrollIndicator={false}>
+          <ScrollView flex={1} showsVerticalScrollIndicator={false} nestedScrollEnabled>
             {content}
           </ScrollView>
         ) : (
           content
         )}
-        <GradualBlurEdges bottomExtra={bottomExtra} />
+        <GradualBlurEdges bottomExtra={bottomExtra} showBottom={!dockedFooter} />
       </View>
     </AppBackground>
   );

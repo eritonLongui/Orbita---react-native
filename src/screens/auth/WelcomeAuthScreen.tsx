@@ -1,77 +1,105 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import { Image, Platform, StyleSheet, TextStyle, View } from 'react-native';
+import { Platform, StyleSheet, TextStyle, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text, YStack } from 'tamagui';
 import { GoogleSignInButton } from '../../components/auth/GoogleSignInButton';
-import { GradientText } from '../../components/ui/GradientText';
+import { LoginPlanetHero } from '../../components/auth/LoginPlanetHero';
+import { OnboardingPreviewCloseButton } from '../../components/onboarding/OnboardingPreviewCloseButton';
+import { OrbitaWordmark } from '../../components/ui/OrbitaWordmark';
+import { StarfieldBackground } from '../../components/ui/StarfieldBackground';
+import { ONBOARDING_COPY } from '../../constants/onboardingCopy';
 import { themeColors } from '../../constants/theme';
+import { titleFontFamily } from '../../constants/typography';
 import { useAuth } from '../../providers/AuthProvider';
 import { getWebAuthUnsupportedMessage, isGoogleWebAuthSupported } from '../../services/googleAuthWeb';
 
-const loginHero = require('../../../assets/images/login-hero.jpg');
+/** Fade abaixo da status bar — planeta some suavemente no topo */
+const STATUS_BAR_FADE_EXTRA = 36;
 
-const descriptionStyle: TextStyle = {
+const taglineStyle: TextStyle = {
   textAlign: 'center',
-  textWrap: 'balance',
-  color: themeColors.text,
+  fontFamily: titleFontFamily,
+  fontWeight: '700',
+  fontSize: 22,
+  lineHeight: 30,
+  letterSpacing: 2.6,
+  textTransform: 'uppercase',
+  maxWidth: 360,
 };
 
-export function WelcomeAuthScreen() {
+interface WelcomeAuthScreenProps {
+  previewMode?: boolean;
+  onClose?: () => void;
+}
+
+export function WelcomeAuthScreen({ previewMode = false, onClose }: WelcomeAuthScreenProps = {}) {
   const insets = useSafeAreaInsets();
   const { signInWithGoogle, signingIn, authError } = useAuth();
   const webAuthBlocked = Platform.OS === 'web' && !isGoogleWebAuthSupported();
-  const displayError = authError ?? (webAuthBlocked ? getWebAuthUnsupportedMessage() : null);
+  const displayError =
+    previewMode ? null : authError ?? (webAuthBlocked ? getWebAuthUnsupportedMessage() : null);
+  const copy = ONBOARDING_COPY.welcome;
+  const footerBottom = Math.max(insets.bottom, 20) + 16;
 
   return (
     <View style={styles.root}>
       <StatusBar style="light" />
 
-      <View style={styles.hero}>
-        <Image source={loginHero} style={styles.heroImage} resizeMode="cover" />
-        <LinearGradient
-          colors={['rgba(0,0,0,0.2)', 'rgba(0,0,0,0.55)', themeColors.bg]}
-          locations={[0.4, 0.78, 1]}
-          style={StyleSheet.absoluteFill}
-        />
-      </View>
+      <StarfieldBackground />
+
+      <LinearGradient
+        pointerEvents="none"
+        colors={[themeColors.bg, `${themeColors.bg}E6`, `${themeColors.bg}00`]}
+        locations={[0, 0.55, 1]}
+        style={[styles.statusBarFade, { height: insets.top + STATUS_BAR_FADE_EXTRA }]}
+      />
+
+      {onClose ? (
+        <View style={[styles.closeButton, { top: insets.top + 8 }]}>
+          <OnboardingPreviewCloseButton onClose={onClose} />
+        </View>
+      ) : null}
 
       <YStack
-        flex={1.1}
-        justify="space-between"
-        px="$5"
-        pb={Math.max(insets.bottom, 20) + 12}
+        flex={1}
+        width="100%"
+        overflow="hidden"
+        bg="transparent"
+        style={styles.content}
       >
-        <YStack flex={1} justify="center" items="center" px="$2" gap="$4">
-          <YStack items="center" gap="$1.5">
-            <Text
-              fontSize={15}
-              fontWeight="600"
-              letterSpacing={1.5}
-              color="$text"
-              textTransform="uppercase"
-            >
-              Seu copiloto
-            </Text>
+        <LoginPlanetHero />
 
-            <GradientText fontSize={42} fontWeight="800" letterSpacing={3}>
-              ORBITA
-            </GradientText>
-          </YStack>
-
-          <Text fontSize={19} lineHeight={28} maxWidth={320} style={descriptionStyle}>
-            Seu copiloto de rotina — clareza, direção e continuidade no dia a dia.
+        <YStack
+          flex={1}
+          justify="center"
+          items="center"
+          px="$6"
+          gap="$6"
+          width="100%"
+          minHeight={0}
+          bg="transparent"
+        >
+          <OrbitaWordmark width={300} />
+          <Text color="$text" style={taglineStyle}>
+            {copy.tagline}
           </Text>
         </YStack>
 
-        <YStack gap="$3" pt="$2">
+        <YStack gap="$3" width="100%" px="$6" pb={footerBottom} bg="transparent">
           <GoogleSignInButton
-            onPress={signInWithGoogle}
-            loading={signingIn}
-            disabled={webAuthBlocked}
+            onPress={previewMode ? () => undefined : signInWithGoogle}
+            loading={previewMode ? false : signingIn}
+            disabled={previewMode || webAuthBlocked}
             variant="elevated"
           />
+
+          {previewMode ? (
+            <Text fontSize={13} color="$textMuted" style={{ textAlign: 'center' }} lineHeight={18}>
+              Somente visualização — o login real fica no fluxo de entrada.
+            </Text>
+          ) : null}
 
           {displayError ? (
             <Text fontSize={13} color="$danger" style={{ textAlign: 'center' }} lineHeight={18}>
@@ -87,17 +115,22 @@ export function WelcomeAuthScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: themeColors.bg,
+    backgroundColor: '#000000',
   },
-  hero: {
-    flex: 1,
-    width: '100%',
-    overflow: 'hidden',
-    paddingTop: 52,
+  content: {
+    zIndex: 1,
+    backgroundColor: 'transparent',
   },
-  heroImage: {
-    width: '100%',
-    height: '108%',
-    transform: [{ translateY: 28 }],
+  statusBarFade: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 2,
+  },
+  closeButton: {
+    position: 'absolute',
+    right: 16,
+    zIndex: 3,
   },
 });

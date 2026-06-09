@@ -1,6 +1,6 @@
 import { FlagBannerFold } from 'phosphor-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { KeyboardAvoidingView, Platform, View } from 'react-native';
+import { KeyboardAvoidingView, Modal, Platform, View } from 'react-native';
 import { useFocusEffect, useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { Text, YStack } from 'tamagui';
@@ -9,7 +9,9 @@ import { LyraFirstSessionBanner } from '../../components/lyra/LyraFirstSessionBa
 import { LyraMode, LyraModeTabs } from '../../components/lyra/LyraModeTabs';
 import { LyraOrb } from '../../components/lyra/LyraOrb';
 import { LyraTextChat } from '../../components/lyra/LyraTextChat';
+import { PermissionCard } from '../../components/orbit/PermissionCard';
 import { OrbitaCard } from '../../components/ui/OrbitaCard';
+import { PERMISSION_COPY } from '../../constants/permissionCopy';
 import { PrimaryButton } from '../../components/ui/PrimaryButton';
 import { ScreenWrapper } from '../../components/ui/ScreenWrapper';
 import { themeColors } from '../../constants/theme';
@@ -17,6 +19,11 @@ import { useJourney } from '../../hooks/useJourney';
 import { useLyraAssistant } from '../../hooks/useLyraAssistant';
 import { useLyraTextChat } from '../../hooks/useLyraTextChat';
 import { MainTabParamList } from '../../navigation/types';
+import {
+  markMicrophonePromptShown,
+  requestMicrophonePermissionIfNeeded,
+  shouldShowMicrophonePrompt,
+} from '../../services/permissions';
 import { LyraChatResponse } from '../../types';
 import { CheckInScreen } from './CheckInScreen';
 
@@ -67,6 +74,8 @@ export function LyraScreen() {
     base64: string;
     mimeType: string;
   } | null>(null);
+  const [showMicPrompt, setShowMicPrompt] = useState(false);
+  const [micPromptLoading, setMicPromptLoading] = useState(false);
 
   const {
     firstLyraCompleted,
@@ -171,6 +180,34 @@ export function LyraScreen() {
 
   const isTextChat = mode === 'text' && !needsCheckIn;
 
+  const handleVoicePress = useCallback(async () => {
+    if (!canTapVoice) return;
+
+    if (await shouldShowMicrophonePrompt()) {
+      setShowMicPrompt(true);
+      return;
+    }
+
+    void toggleRecording();
+  }, [canTapVoice, toggleRecording]);
+
+  const handleMicAllow = useCallback(async () => {
+    setMicPromptLoading(true);
+    try {
+      await requestMicrophonePermissionIfNeeded();
+      await markMicrophonePromptShown();
+      setShowMicPrompt(false);
+      void toggleRecording();
+    } finally {
+      setMicPromptLoading(false);
+    }
+  }, [toggleRecording]);
+
+  const handleMicSkip = useCallback(async () => {
+    await markMicrophonePromptShown();
+    setShowMicPrompt(false);
+  }, []);
+
   return (
     <ScreenWrapper scrollable={false} tabBarOffset compactBottom={isTextChat}>
       <YStack flex={1} pt="$4" px="$2">
@@ -237,7 +274,7 @@ export function LyraScreen() {
                   <LyraOrb
                     state={state}
                     pressable={canTapVoice}
-                    onPress={canTapVoice ? () => void toggleRecording() : undefined}
+                    onPress={canTapVoice ? () => void handleVoicePress() : undefined}
                   />
                   <VoiceStatusHint state={state} />
                   <VoiceHint state={state} busy={isLyraBusy} />
@@ -278,6 +315,26 @@ export function LyraScreen() {
         onClose={() => setShowCheckInModal(false)}
         onComplete={(response) => void handleCheckInComplete(response)}
       />
+
+      <Modal visible={showMicPrompt} animationType="fade" transparent>
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: 'rgba(0,0,0,0.85)',
+            justifyContent: 'center',
+            paddingHorizontal: 20,
+          }}
+        >
+          <PermissionCard
+            title={PERMISSION_COPY.microphone.title}
+            context={PERMISSION_COPY.microphone.context}
+            message={PERMISSION_COPY.microphone.message}
+            onAllow={() => void handleMicAllow()}
+            onSkip={() => void handleMicSkip()}
+            loading={micPromptLoading}
+          />
+        </View>
+      </Modal>
     </ScreenWrapper>
   );
 }

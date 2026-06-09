@@ -1,8 +1,6 @@
 export type AuthStackParamList = {
   Welcome: undefined;
-  OnboardingPillars: undefined;
-  OnboardingProfile: undefined;
-  Permissions: undefined;
+  OnboardingFlow: undefined;
 };
 
 export type ProfileStackParamList = {
@@ -13,6 +11,7 @@ export type ProfileStackParamList = {
   PermissionsSettings: undefined;
   SecurityPrivacy: undefined;
   OnboardingTest: undefined;
+  LoginTest: undefined;
 };
 
 export type MainTabParamList = {

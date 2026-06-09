@@ -20,6 +20,26 @@ interface OrbitRadarProps {
 }
 
 const LABELS_OFFSET = 22;
+/** Margem extra para rótulos longos (ex.: Bem-estar) não cortarem nas bordas. */
+const CHART_PADDING = 36;
+
+function getLabelStyle(angle: number) {
+  const cos = Math.cos(angle);
+  const sin = Math.sin(angle);
+
+  // Direita — texto cresce para a esquerda (em direção ao centro)
+  if (cos > 0.3) {
+    return { textAnchor: 'end' as const, dx: -4, dy: sin > 0 ? 3 : -2 };
+  }
+  // Esquerda — texto cresce para a direita (em direção ao centro)
+  if (cos < -0.3) {
+    return { textAnchor: 'start' as const, dx: 4, dy: sin > 0 ? 3 : -2 };
+  }
+  if (sin < -0.3) {
+    return { textAnchor: 'middle' as const, dx: 0, dy: -6 };
+  }
+  return { textAnchor: 'middle' as const, dx: 0, dy: 8 };
+}
 
 export function OrbitRadar({ areas, size = 260, hideCenterScore = false }: OrbitRadarProps) {
   const gradientId = useId().replace(/:/g, '');
@@ -27,7 +47,8 @@ export function OrbitRadar({ areas, size = 260, hideCenterScore = false }: Orbit
   const strokeId = `orbitRadarStroke-${gradientId}`;
   const glowId = `orbitRadarGlow-${gradientId}`;
 
-  const center = size / 2;
+  const svgSize = size + CHART_PADDING * 2;
+  const center = svgSize / 2;
   const radius = size / 2 - 42;
   const count = areas.length;
   const angleStep = (2 * Math.PI) / count;
@@ -46,7 +67,7 @@ export function OrbitRadar({ areas, size = 260, hideCenterScore = false }: Orbit
 
   return (
     <YStack items="center">
-      <Svg width={size} height={size}>
+      <Svg width={svgSize} height={svgSize}>
         <Defs>
           <RadialGradient id={glowId} cx="50%" cy="50%" rx="50%" ry="50%">
             <Stop offset="0%" stopColor={themeColors.primaryGlow} stopOpacity="0.2" />
@@ -152,15 +173,18 @@ export function OrbitRadar({ areas, size = 260, hideCenterScore = false }: Orbit
           const labelR = radius + LABELS_OFFSET;
           const x = center + labelR * Math.cos(angle);
           const y = center + labelR * Math.sin(angle);
+          const labelStyle = getLabelStyle(angle);
           return (
             <SvgText
               key={area.type}
               x={x}
               y={y}
+              dx={labelStyle.dx}
+              dy={labelStyle.dy}
               fill={themeColors.textMuted}
               fontSize={11}
               fontWeight="700"
-              textAnchor="middle"
+              textAnchor={labelStyle.textAnchor}
               alignmentBaseline="middle"
             >
               {area.label}

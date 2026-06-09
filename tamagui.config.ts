@@ -1,7 +1,32 @@
 import { defaultConfig } from '@tamagui/config/v5';
 import { createAnimations } from '@tamagui/animations-moti';
-import { createTamagui, createTokens } from 'tamagui';
+import { createFont, createTamagui, createTokens } from 'tamagui';
+import { bodyFontFamilies, titleFontFamilies } from './src/constants/typography';
 import { themeColors } from './src/constants/theme';
+
+const interFont = createFont({
+  ...defaultConfig.fonts.body,
+  family: 'Inter',
+  face: {
+    400: { normal: bodyFontFamilies.regular },
+    500: { normal: bodyFontFamilies.medium },
+    600: { normal: bodyFontFamilies.semibold },
+    700: { normal: bodyFontFamilies.bold },
+    800: { normal: bodyFontFamilies.bold },
+  },
+});
+
+const spaceGroteskFont = createFont({
+  ...defaultConfig.fonts.heading,
+  family: 'SpaceGrotesk',
+  face: {
+    400: { normal: titleFontFamilies.regular },
+    500: { normal: titleFontFamilies.medium },
+    600: { normal: titleFontFamilies.semibold },
+    700: { normal: titleFontFamilies.bold },
+    800: { normal: titleFontFamilies.bold },
+  },
+});
 
 const tokens = createTokens({
   color: {
@@ -11,12 +36,16 @@ const tokens = createTokens({
     surfaceMuted: themeColors.surfaceMuted,
     glass: themeColors.glass,
     glassBorder: themeColors.glassBorder,
+    glassBorderStrong: themeColors.glassBorderStrong,
     glassButton: themeColors.glassButton,
     glassButtonDisabled: themeColors.glassButtonDisabled,
     text: themeColors.text,
     textMuted: themeColors.textMuted,
     textSecondary: themeColors.textSecondary,
     textSubtle: themeColors.textSubtle,
+    textSupport: themeColors.textSupport,
+    textSupportMuted: themeColors.textSupportMuted,
+    textPlaceholder: themeColors.textPlaceholder,
     primary: themeColors.primary,
     primarySoft: themeColors.primarySoft,
     primaryGlow: themeColors.primaryGlow,
@@ -50,28 +79,43 @@ const tokens = createTokens({
   zIndex: defaultConfig.tokens.zIndex,
 });
 
+const textColors = {
+  text: tokens.color.text,
+  textMuted: tokens.color.text,
+  textSecondary: tokens.color.text,
+  textSubtle: tokens.color.text,
+  textSupport: tokens.color.text,
+  textSupportMuted: tokens.color.text,
+} as const;
+
 const darkTheme = {
+  fontFamily: '$body',
   background: tokens.color.bg,
   backgroundHover: tokens.color.bgSoft,
   backgroundPress: tokens.color.surfaceMuted,
   backgroundFocus: tokens.color.bgSoft,
   color: tokens.color.text,
   colorHover: tokens.color.text,
-  colorPress: tokens.color.textMuted,
+  colorPress: tokens.color.text,
   colorFocus: tokens.color.text,
   borderColor: tokens.color.border,
   borderColorHover: tokens.color.glassBorder,
-  placeholderColor: tokens.color.textMuted,
+  placeholderColor: tokens.color.text,
   shadowColor: tokens.color.shadowColor,
   success: tokens.color.success,
   warning: tokens.color.warning,
   danger: tokens.color.danger,
   info: tokens.color.info,
+  ...textColors,
 };
 
 export const tamaguiConfig = createTamagui({
   ...defaultConfig,
   tokens,
+  fonts: {
+    body: interFont,
+    heading: spaceGroteskFont,
+  },
   themes: {
     dark: {
       ...defaultConfig.themes.dark,

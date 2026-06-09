@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text } from 'tamagui';
+import { TitleText } from './TitleText';
 
 interface SectionTitleProps {
   children: string;
@@ -7,8 +7,8 @@ interface SectionTitleProps {
 
 export function SectionTitle({ children }: SectionTitleProps) {
   return (
-    <Text fontSize={14} fontWeight="800" letterSpacing={1.2} color="$text">
+    <TitleText size="section">
       {children.toUpperCase()}
-    </Text>
+    </TitleText>
   );
 }

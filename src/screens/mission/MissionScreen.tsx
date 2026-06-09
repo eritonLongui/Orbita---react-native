@@ -1,8 +1,10 @@
 import React, { useCallback } from 'react';
+import { View } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import * as Haptics from 'expo-haptics';
 import { Spinner, Text, YStack } from 'tamagui';
+import { InlinePermissionPrompt } from '../../components/permissions/InlinePermissionPrompt';
 import { HomeHeader } from '../../components/mission/HomeHeader';
 import { HomeStatsGrid } from '../../components/mission/HomeStatsGrid';
 import { MissionDayCard } from '../../components/mission/MissionDayCard';
@@ -12,7 +14,9 @@ import { SmartTaskList } from '../../components/mission/SmartTaskList';
 import { InsightCard } from '../../components/orbit';
 import { ScreenWrapper } from '../../components/ui/ScreenWrapper';
 import { SectionTitle } from '../../components/ui/SectionTitle';
+import { PERMISSION_COPY } from '../../constants/permissionCopy';
 import { CHECK_IN_PENDING_COPY, getMissionHeroCopy } from '../../constants/missionCopy';
+import { useNotificationPermissionPrompt } from '../../hooks/useNotificationPermissionPrompt';
 import { TalkToLyraButton } from '../../components/lyra/TalkToLyraButton';
 import { useDailyTasks } from '../../hooks/useDailyTasks';
 import { useJourney } from '../../hooks/useJourney';
@@ -39,6 +43,13 @@ export function MissionScreen() {
     trackMissionVisit,
   } = useJourney();
   const { tasks, refresh: refreshTasks, toggleDone } = useDailyTasks();
+  const {
+    visible: showNotifPrompt,
+    loading: notifPromptLoading,
+    check: checkNotifPrompt,
+    allow: allowNotifications,
+    skip: skipNotifications,
+  } = useNotificationPermissionPrompt();
   const name = profile?.full_name?.split(' ')[0] ?? 'Comandante';
   const missionNumber = mockDataEnabled
     ? MOCK_MISSION_DAY
@@ -50,8 +61,9 @@ export function MissionScreen() {
         await trackMissionVisit();
         await refresh();
         await refreshTasks();
+        await checkNotifPrompt();
       })();
-    }, [refresh, refreshTasks, trackMissionVisit]),
+    }, [refresh, refreshTasks, trackMissionVisit, checkNotifPrompt]),
   );
 
   const journeyState = resolveJourneyState(hasData, firstLyraCompleted);
@@ -93,7 +105,19 @@ export function MissionScreen() {
       <YStack gap="$6" pb="$14" pt="$4" px="$2">
         <HomeHeader name={name} photoUrl={getProfilePhotoUrl(profile, user)} />
 
-        <MissionDayCard missionDay={missionNumber} streak={visitStreak || 1} />
+        {showNotifPrompt ? (
+          <InlinePermissionPrompt
+            title={PERMISSION_COPY.notifications.title}
+            message={PERMISSION_COPY.notifications.message}
+            onAllow={() => void allowNotifications()}
+            onSkip={() => void skipNotifications()}
+            loading={notifPromptLoading}
+          />
+        ) : null}
+
+        <View style={{ zIndex: 2 }}>
+          <MissionDayCard missionDay={missionNumber} streak={visitStreak || 1} />
+        </View>
 
         <MissionStatusCard
           title={heroCopy.title}

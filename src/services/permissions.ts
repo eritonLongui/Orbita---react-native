@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import {
@@ -5,10 +6,37 @@ import {
   requestRecordingPermissionsAsync,
 } from 'expo-audio';
 
-const BETWEEN_DIALOGS_MS = Platform.OS === 'ios' ? 450 : 200;
+export const PERMISSION_PROMPT_KEYS = {
+  notificationPromptShown: 'orbita_notification_prompt_shown',
+  microphonePromptShown: 'orbita_microphone_prompt_shown',
+} as const;
 
-function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+async function isPromptShown(key: string): Promise<boolean> {
+  return (await AsyncStorage.getItem(key)) === 'true';
+}
+
+export async function markNotificationPromptShown(): Promise<void> {
+  await AsyncStorage.setItem(PERMISSION_PROMPT_KEYS.notificationPromptShown, 'true');
+}
+
+export async function markMicrophonePromptShown(): Promise<void> {
+  await AsyncStorage.setItem(PERMISSION_PROMPT_KEYS.microphonePromptShown, 'true');
+}
+
+export async function shouldShowNotificationPrompt(): Promise<boolean> {
+  if (Platform.OS === 'web') return false;
+  if (await isPromptShown(PERMISSION_PROMPT_KEYS.notificationPromptShown)) return false;
+  const current = await Notifications.getPermissionsAsync();
+  if (current.granted) return false;
+  return true;
+}
+
+export async function shouldShowMicrophonePrompt(): Promise<boolean> {
+  if (Platform.OS === 'web') return false;
+  if (await isPromptShown(PERMISSION_PROMPT_KEYS.microphonePromptShown)) return false;
+  const current = await getRecordingPermissionsAsync();
+  if (current.granted) return false;
+  return true;
 }
 
 export async function requestMicrophonePermissionIfNeeded(): Promise<boolean> {
@@ -34,11 +62,4 @@ export async function requestNotificationPermissionIfNeeded(): Promise<boolean> 
   });
 
   return result.granted ?? result.status === 'granted';
-}
-
-/** Pede microfone e, em seguida, notificações — cada uma abre o modal do sistema se ainda não foi respondida. */
-export async function requestOnboardingPermissions(): Promise<void> {
-  await requestMicrophonePermissionIfNeeded();
-  await delay(BETWEEN_DIALOGS_MS);
-  await requestNotificationPermissionIfNeeded();
 }

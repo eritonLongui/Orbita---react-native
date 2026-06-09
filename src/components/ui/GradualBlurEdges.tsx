@@ -14,6 +14,7 @@ const BOTTOM_FADE = BOTTOM_EDGE_FADE_HEIGHT;
 interface GradualBlurEdgesProps {
   /** Altura extra no rodapé (ex.: tab bar flutuante) */
   bottomExtra?: number;
+  showBottom?: boolean;
 }
 
 function BlurEdge({
@@ -51,14 +52,19 @@ function BlurEdge({
   );
 }
 
-export function GradualBlurEdges({ bottomExtra = 0 }: GradualBlurEdgesProps) {
+export function GradualBlurEdges({
+  bottomExtra = 0,
+  showBottom = true,
+}: GradualBlurEdgesProps) {
   const insets = useSafeAreaInsets();
   const statusBarFadeHeight = insets.top + STATUS_BAR_FADE_EXTRA;
 
   return (
     <>
       <BlurEdge position="top" height={statusBarFadeHeight} />
-      <BlurEdge position="bottom" height={BOTTOM_FADE + bottomExtra + insets.bottom} />
+      {showBottom ? (
+        <BlurEdge position="bottom" height={BOTTOM_FADE + bottomExtra + insets.bottom} />
+      ) : null}
     </>
   );
 }

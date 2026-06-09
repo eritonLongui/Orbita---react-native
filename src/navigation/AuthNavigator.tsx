@@ -1,15 +1,11 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import React, { useEffect, useState } from 'react';
-import { OnboardingPillarsScreen } from '../screens/auth/OnboardingPillarsScreen';
-import { OnboardingProfileScreen } from '../screens/auth/OnboardingProfileScreen';
-import { PermissionsOnboardingScreen } from '../screens/auth/PermissionsOnboardingScreen';
+import React from 'react';
 import { WelcomeAuthScreen } from '../screens/auth/WelcomeAuthScreen';
+import { OnboardingFlowScreen } from '../screens/onboarding/OnboardingFlowScreen';
 import { markFirstLyraPending } from '../services/journey';
 import { AuthStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
-const PERMISSIONS_KEY = 'orbita_permissions_prompted';
 
 interface AuthNavigatorProps {
   initialRoute: keyof AuthStackParamList;
@@ -17,50 +13,18 @@ interface AuthNavigatorProps {
 }
 
 export function AuthNavigator({ initialRoute, onOnboardingComplete }: AuthNavigatorProps) {
-  const [permissionsDone, setPermissionsDone] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    AsyncStorage.getItem(PERMISSIONS_KEY).then((v) => setPermissionsDone(v === 'true'));
-  }, []);
-
-  const finishPermissions = async () => {
-    await AsyncStorage.setItem(PERMISSIONS_KEY, 'true');
-    await markFirstLyraPending();
-    onOnboardingComplete();
+  const finishOnboarding = () => {
+    void markFirstLyraPending().then(onOnboardingComplete);
   };
-
-  if (permissionsDone === null) {
-    return null;
-  }
 
   return (
     <Stack.Navigator
       initialRouteName={initialRoute}
-      screenOptions={{ headerShown: false, animation: 'fade' }}
+      screenOptions={{ headerShown: false, animation: 'slide_from_right' }}
     >
       <Stack.Screen name="Welcome" component={WelcomeAuthScreen} />
-      <Stack.Screen name="OnboardingPillars">
-        {({ navigation }) => (
-          <OnboardingPillarsScreen
-            onContinue={() => navigation.navigate('OnboardingProfile')}
-          />
-        )}
-      </Stack.Screen>
-      <Stack.Screen name="OnboardingProfile">
-        {({ navigation }) => (
-          <OnboardingProfileScreen
-            onComplete={() => {
-              if (permissionsDone) {
-                void markFirstLyraPending().then(onOnboardingComplete);
-              } else {
-                navigation.navigate('Permissions');
-              }
-            }}
-          />
-        )}
-      </Stack.Screen>
-      <Stack.Screen name="Permissions">
-        {() => <PermissionsOnboardingScreen onComplete={finishPermissions} />}
+      <Stack.Screen name="OnboardingFlow">
+        {() => <OnboardingFlowScreen onComplete={finishOnboarding} />}
       </Stack.Screen>
     </Stack.Navigator>
   );

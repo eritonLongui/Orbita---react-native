@@ -12,6 +12,7 @@ interface TalkToLyraButtonProps {
   loading?: boolean;
   disabled?: boolean;
   variant?: 'primary' | 'outline';
+  fullWidth?: boolean;
 }
 
 export function TalkToLyraButton({
@@ -19,6 +20,7 @@ export function TalkToLyraButton({
   loading,
   disabled,
   variant = 'outline',
+  fullWidth = false,
 }: TalkToLyraButtonProps) {
   const isDisabled = loading || disabled;
   const isPrimary = variant === 'primary';
@@ -29,6 +31,7 @@ export function TalkToLyraButton({
       disabled={isDisabled}
       style={({ pressed }) => [
         styles.wrapper,
+        fullWidth && styles.wrapperFullWidth,
         isPrimary ? styles.wrapperPrimary : styles.wrapperOutline,
         isDisabled && styles.wrapperDisabled,
         pressed && !isDisabled && styles.pressed,
@@ -76,14 +79,18 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingHorizontal: 16,
   },
+  wrapperFullWidth: {
+    alignSelf: 'stretch',
+    width: '100%',
+  },
   wrapperPrimary: {
-    borderColor: 'rgba(255, 255, 255, 0.18)',
+    borderColor: themeColors.glassBorderStrong,
   },
   wrapperOutline: {
     borderColor: themeColors.glassBorder,
   },
   wrapperDisabled: {
-    borderColor: 'rgba(255, 255, 255, 0.06)',
+    borderColor: 'rgba(255, 255, 255, 0.14)',
   },
   blur: {
     ...StyleSheet.absoluteFill,

@@ -71,13 +71,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   wrapperPrimary: {
-    borderColor: 'rgba(255, 255, 255, 0.18)',
+    borderColor: themeColors.glassBorderStrong,
   },
   wrapperOutline: {
     borderColor: themeColors.glassBorder,
   },
   wrapperDisabled: {
-    borderColor: 'rgba(255, 255, 255, 0.06)',
+    borderColor: 'rgba(255, 255, 255, 0.14)',
   },
   blur: {
     ...StyleSheet.absoluteFill,

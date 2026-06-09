@@ -3,6 +3,7 @@ import React from 'react';
 import { Text, XStack, YStack } from 'tamagui';
 import { themeColors } from '../../constants/theme';
 import { OrbitaCard } from '../ui/OrbitaCard';
+import { TitleText } from '../ui/TitleText';
 
 interface MissionDayCardProps {
   missionDay: number;
@@ -28,9 +29,9 @@ export function MissionDayCard({ missionDay, streak }: MissionDayCardProps) {
               MINHA MISSÃO
             </Text>
           </XStack>
-          <Text fontSize={20} fontWeight="800" color="$text" lineHeight={26}>
+          <TitleText size="lg" lineHeight={26}>
             Dia {missionDay}
-          </Text>
+          </TitleText>
           <Text fontSize={13} color="$textSupport" lineHeight={18}>
             Desde que você entrou na Orbita
           </Text>
@@ -51,9 +52,9 @@ export function MissionDayCard({ missionDay, streak }: MissionDayCardProps) {
             </Text>
           </XStack>
           <XStack items="baseline" gap="$1.5" flexWrap="nowrap">
-            <Text fontSize={22} fontWeight="800" color="$text" lineHeight={26} flexShrink={0}>
+            <TitleText size="card" lineHeight={26} flexShrink={0}>
               {streak}
-            </Text>
+            </TitleText>
             <Text fontSize={13} fontWeight="600" color="$text" lineHeight={18} flexShrink={1}>
               {sequenceSuffix}
             </Text>

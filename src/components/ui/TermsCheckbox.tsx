@@ -22,7 +22,7 @@ export function TermsCheckbox({ checked, onToggle, label }: TermsCheckboxProps) 
         <View style={[styles.box, checked && styles.boxChecked]}>
           {checked ? <Check size={14} color="white" weight="bold" /> : null}
         </View>
-        <Text flex={1} fontSize={12} color="$textMuted" lineHeight={17}>
+        <Text flex={1} fontSize={12} color="$text" lineHeight={17}>
           {label}
         </Text>
       </XStack>
@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
     height: 22,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: themeColors.glassBorder,
+    borderColor: themeColors.glassBorderStrong,
     backgroundColor: themeColors.glass,
     alignItems: 'center',
     justifyContent: 'center',

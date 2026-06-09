@@ -2,7 +2,8 @@ import { useNavigation } from '@react-navigation/native';
 import { CaretLeft } from 'phosphor-react-native';
 import React from 'react';
 import { Pressable } from 'react-native';
-import { Text, XStack } from 'tamagui';
+import { XStack } from 'tamagui';
+import { TitleText } from '../ui/TitleText';
 import { themeColors } from '../../constants/theme';
 
 interface SettingsBackHeaderProps {
@@ -21,9 +22,9 @@ export function SettingsBackHeader({ title }: SettingsBackHeaderProps) {
       >
         <CaretLeft size={22} color={themeColors.text} />
       </Pressable>
-      <Text fontSize={24} fontWeight="800" color="$text">
+      <TitleText size="screen" fontSize={24}>
         {title}
-      </Text>
+      </TitleText>
     </XStack>
   );
 }

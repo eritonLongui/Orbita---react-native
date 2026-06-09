@@ -68,6 +68,12 @@ if [ "$PREBUILD_IOS" = true ] || [ "$PREBUILD_ANDROID" = true ]; then
   if [ "$(uname -s)" = "Darwin" ] && [ ! -d "/Applications/Xcode.app" ]; then
     warn "Xcode não encontrado — prebuild iOS pode falhar"
   fi
+  if [ "$PREBUILD_IOS" = true ] && ! command -v pod >/dev/null 2>&1; then
+    warn "CocoaPods não encontrado — após prebuild rode: cd ios && pod install"
+  fi
+  if [ "$PREBUILD_ANDROID" = true ] && [ -z "${ANDROID_HOME:-}" ] && [ ! -d "$HOME/Library/Android/sdk" ]; then
+    warn "Android SDK não detectado — instale Android Studio e configure ANDROID_HOME"
+  fi
 fi
 
 echo ""
@@ -178,4 +184,6 @@ fi
 echo "Só testar (sem clonar):"
 echo "  https://expo.dev/accounts/marcomendessv/projects/Orbita/builds"
 echo ""
-echo "Docs: README.md · docs/GOOGLE_LOGIN.md · docs/PRODUCTION.md"
+echo "Docs: README.md · docs/APRESENTACAO_EQUIPE.md · docs/GOOGLE_LOGIN.md"
+echo ""
+echo "⚠ Não use Expo Go — login Google exige dev build (npm run ios / android ou APK EAS)."

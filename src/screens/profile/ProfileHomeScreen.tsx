@@ -9,6 +9,8 @@ import { ConfirmationModal } from '../../components/orbit';
 import { LogoutButton } from '../../components/settings/LogoutButton';
 import { SettingsMenuRow } from '../../components/settings/SettingsMenuRow';
 import { OrbitaCard } from '../../components/ui/OrbitaCard';
+import { OrbitaWordmark } from '../../components/ui/OrbitaWordmark';
+import { TitleText } from '../../components/ui/TitleText';
 import { OrbitaSwitch } from '../../components/ui/OrbitaSwitch';
 import { ScreenWrapper } from '../../components/ui/ScreenWrapper';
 import { ProfileStackParamList } from '../../navigation/types';
@@ -60,9 +62,7 @@ export function ProfileHomeScreen() {
   return (
     <ScreenWrapper tabBarOffset>
       <YStack gap="$5" pt="$4" px="$2" pb="$14">
-        <Text fontSize={28} fontWeight="800" color="$text">
-          Minha conta
-        </Text>
+        <TitleText size="screen">Minha conta</TitleText>
 
         <XStack gap="$3" items="center">
           {photoUrl ? (
@@ -150,6 +150,24 @@ export function ProfileHomeScreen() {
           <OrbitaCard>
             <YStack gap="$2">
               <Text fontSize={15} fontWeight="600" color="$text">
+                Abrir login
+              </Text>
+              <Text fontSize={13} color="$textMuted" lineHeight={18}>
+                Visualiza a tela de entrada (planeta, partículas e wordmark) sem iniciar sessão.
+              </Text>
+              <Text
+                fontSize={14}
+                fontWeight="600"
+                color="$primary"
+                onPress={() => navigation.navigate('LoginTest')}
+              >
+                Iniciar preview
+              </Text>
+            </YStack>
+          </OrbitaCard>
+          <OrbitaCard>
+            <YStack gap="$2">
+              <Text fontSize={15} fontWeight="600" color="$text">
                 Limpar chat de texto
               </Text>
               <Text fontSize={13} color="$textMuted" lineHeight={18}>
@@ -192,7 +210,8 @@ export function ProfileHomeScreen() {
 
         <LogoutButton onPress={() => setLogoutVisible(true)} />
 
-        <YStack gap="$1.5" items="center" pt="$2">
+        <YStack gap="$2.5" items="center" pt="$4" pb="$2">
+          <OrbitaWordmark width={222} />
           <Text
             fontSize={12}
             text="center"
