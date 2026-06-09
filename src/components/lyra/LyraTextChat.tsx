@@ -177,7 +177,6 @@ export function LyraTextChat({ messages, isLoading, needsCheckIn }: LyraTextChat
           flexGrow: 1, 
           justifyContent: messages.length === 0 ? 'center' : 'flex-end',
           paddingTop: 16,
-          paddingBottom: 8,
         }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"

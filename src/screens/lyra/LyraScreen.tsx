@@ -244,7 +244,7 @@ export function LyraScreen() {
             {statusTitle}
           </Text>
           {needsCheckIn && areasDone > 0 ? (
-            <Text fontSize={13} color="$textSupport">
+            <Text fontSize={13} color="$text">
               {areasDone} de {CHECK_IN_AREA_IDS.length} áreas registradas
             </Text>
           ) : null}
