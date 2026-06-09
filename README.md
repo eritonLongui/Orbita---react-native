@@ -39,10 +39,10 @@ A **Lyra** acompanha sua trajetória, registra progressos e oferece suporte pers
 
 ## 📱 Demonstração
 
-<img width="22%" height="850" alt="ezgif com-video-to-gif-converter" src="https://github.com/user-attachments/assets/e20ec5b5-59c2-4715-9fdf-4c0d8d9dae6f" />
-<img width="22%" height="850" alt="WhatsAppVideo2026-06-09at20 05 48-ezgif com-video-to-gif-converter" src="https://github.com/user-attachments/assets/51c179be-acf4-4c18-9ba8-1c676db0707e" />
-<img width="22%" height="850" alt="ezgif com-video-to-gif-converter (1)" src="https://github.com/user-attachments/assets/9461b66c-7ef4-4014-b18d-0b1802ef2aa2" />
-<img width="22%" height="850" alt="ezgif com-video-to-gif-converter (2)" src="https://github.com/user-attachments/assets/93364d77-6b07-402e-a314-f26bbb183d39" />
+<img width="25%" height="850" alt="ezgif com-video-to-gif-converter" src="https://github.com/user-attachments/assets/e20ec5b5-59c2-4715-9fdf-4c0d8d9dae6f" />
+<img width="25%" height="850" alt="WhatsAppVideo2026-06-09at20 05 48-ezgif com-video-to-gif-converter" src="https://github.com/user-attachments/assets/51c179be-acf4-4c18-9ba8-1c676db0707e" />
+<img width="24%" height="850" alt="ezgif com-video-to-gif-converter (1)" src="https://github.com/user-attachments/assets/9461b66c-7ef4-4014-b18d-0b1802ef2aa2" />
+<img width="24%" height="850" alt="ezgif com-video-to-gif-converter (2)" src="https://github.com/user-attachments/assets/93364d77-6b07-402e-a314-f26bbb183d39" />
 
 
 
