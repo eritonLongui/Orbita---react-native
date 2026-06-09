@@ -104,11 +104,11 @@ Documentação viva: [`docs/USER_JOURNEY.md`](docs/USER_JOURNEY.md) · skill Cur
 
 ## Caminho A — Só testar (APK)
 
-1. Abra os builds do projeto:  
-   **https://expo.dev/accounts/marcomendessv/projects/Orbita/builds**
-2. Baixe o APK Android mais recente com profile **preview** (status *finished*).
-3. Instale no celular Android.
-4. Toque em **Continuar com Google**.
+1. Baixe o APK preview mais recente:  
+   **https://github.com/eritonLongui/Orbita---react-native/releases/tag/preview-fb2127fd**  
+   (alternativa: [builds EAS](https://expo.dev/accounts/marcomendessv/projects/Orbita/builds))
+2. Instale no celular Android.
+3. Toque em **Continuar com Google**.
 
 O APK de **preview** é assinado com o certificado EAS cadastrado no Firebase — **login Google funciona para qualquer pessoa** que instalar esse APK, sem configurar SHA-1 no notebook dela.
 

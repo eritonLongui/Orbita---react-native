@@ -48,3 +48,7 @@ firebase-debug.log
 # generated native folders
 /ios
 /android
+
+# APK/IPA locais (distribuição via GitHub Releases ou EAS)
+releases/*.apk
+releases/*.ipa
