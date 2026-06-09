@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "649295071611-gq0qa5e2om1tvuklcqdgp3nl2baienun.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.orbita.fiap",
+            "certificate_hash": "878a430aab498e1552c6877c7a3bb0d625213642"
+          }
+        },
+        {
           "client_id": "649295071611-ds35rvbjugjua54gc5i6bbp004ifu59e.apps.googleusercontent.com",
           "client_type": 3
         }
