@@ -1,20 +1,28 @@
-# Orbita
+# 🪐 Orbita
 
-**Seu centro de comando emocional** — app mobile que ajuda você a equilibrar cinco dimensões da vida (Descanso, Energia, Ritmo, Nutrição e Bem-estar) com a **Lyra**, inteligência da nave por voz e texto.
+[![React Native](https://img.shields.io/badge/React_Native-0.85-20232A?style=flat&logo=react&logoColor=61DAFB)](https://reactnative.dev/)
+[![Expo](https://img.shields.io/badge/Expo-56-000020?style=flat&logo=expo&logoColor=white)](https://expo.dev/)
+[![Supabase](https://img.shields.io/badge/Supabase-Database-3ECF8E?style=flat&logo=supabase&logoColor=white)](https://supabase.io/)
+[![OpenAI](https://img.shields.io/badge/OpenAI-Lyra_AI-412991?style=flat&logo=openai&logoColor=white)](https://openai.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
----
+**Seu centro de comando emocional**, um app mobile que ajuda você a equilibrar cinco dimensões da vida (Descanso, Energia, Ritmo, Nutrição e Bem-estar) com a **Lyra**, a inteligência da nave acessível por voz e texto.
 
-## O que é
+> 🏆 **Global Solution FIAP 2026 · Indústria Espacial**
+> Este projeto foi desenvolvido como proposta de solução para os desafios de saúde mental e performance em situações de isolamento prolongado (no espaço ou na Terra).
+>
+
+## 🚀 O que é o Orbita?
 
 A **Órbita** é um espaço dedicado ao bem-estar emocional. Cada **tripulante** representa uma dimensão importante da sua vida. Juntos, desenvolvem consciência, equilíbrio e qualidade de vida.
 
-A **Lyra** acompanha sua trajetória, registra progressos e oferece suporte personalizado durante a **missão** do dia — da conversa ao insight, da análise de padrões às micro-tarefas sugeridas.
+A **Lyra** acompanha sua trajetória, registra progressos e oferece suporte personalizado durante a **missão** do dia, da conversa ao insight, da análise de padrões às micro-tarefas sugeridas.
 
 ### Proposta de valor
 
-> Toda jornada precisa de uma tripulação. A Órbita traduz seu momento em clareza, direção e continuidade — sem culpa, sem gamificação punitiva.
+> _Toda jornada precisa de uma tripulação. A Órbita traduz seu momento em clareza, direção e continuidade, sem culpa, sem gamificação punitiva._
 
-### Diferencial (IA)
+### 🤖 Como a Lyra funciona
 
 | Etapa | O que a Lyra faz |
 |-------|------------------|
@@ -25,11 +33,21 @@ A **Lyra** acompanha sua trajetória, registra progressos e oferece suporte pers
 | **Tarefas** | Sugere micro-ações do dia na Missão |
 | **Padrões** | Histórico e evolução ao longo do tempo |
 
-A chave da OpenAI **nunca** fica no celular — só na Edge Function `lyra-chat` (Supabase).
+> A chave da OpenAI **nunca** fica no celular, só na Edge Function `lyra-chat` (Supabase).
 
 ---
 
-## Plataforma e stack
+## 📱 Demonstração
+
+<img width="22%" height="850" alt="ezgif com-video-to-gif-converter" src="https://github.com/user-attachments/assets/e20ec5b5-59c2-4715-9fdf-4c0d8d9dae6f" />
+<img width="22%" height="850" alt="WhatsAppVideo2026-06-09at20 05 48-ezgif com-video-to-gif-converter" src="https://github.com/user-attachments/assets/51c179be-acf4-4c18-9ba8-1c676db0707e" />
+<img width="22%" height="850" alt="ezgif com-video-to-gif-converter (1)" src="https://github.com/user-attachments/assets/9461b66c-7ef4-4014-b18d-0b1802ef2aa2" />
+<img width="22%" height="850" alt="ezgif com-video-to-gif-converter (2)" src="https://github.com/user-attachments/assets/93364d77-6b07-402e-a314-f26bbb183d39" />
+
+
+
+
+## 🛠️ Stack técnica
 
 | Camada | Tecnologia |
 |--------|------------|
@@ -43,11 +61,11 @@ A chave da OpenAI **nunca** fica no celular — só na Edge Function `lyra-chat`
 | **Voz** | OpenAI TTS + `expo-audio` / `expo-speech` |
 | **Build** | EAS Build · dev client nativo |
 
-**Importante:** não use **Expo Go** — login Google, pager do onboarding, manipulação de imagem e áudio exigem **dev build** (`npm run ios` / `npm run android` ou APK EAS).
+⚠️ **Importante:** Não utilize o **Expo Go**. Recursos como login com Google, pager do onboarding e manipulação avançada de áudio exigem **dev build** (`npm run ios` / `npm run android` ou instalação do APK via EAS).
 
 ---
 
-## Jornada do usuário
+## 🗺️ Jornada do usuário
 
 ```mermaid
 flowchart TD
@@ -87,11 +105,12 @@ Rotina    → Tarefas do dia + conquistas
 | **Conquistas** | Marcos da jornada |
 | **Perfil** | Conta, Lyra, permissões, área de testes |
 
-Documentação viva: [`docs/USER_JOURNEY.md`](docs/USER_JOURNEY.md) · skill Cursor: `.cursor/skills/orbita-journey/`
+Documentação viva: [`docs/USER_JOURNEY.md`](docs/USER_JOURNEY.md)
 
 ---
 
-## Escolha seu caminho
+## 🚀 Guia de instalação
+Escolha o caminho de acordo com seu objetivo:
 
 | Objetivo | Caminho |
 |----------|---------|
@@ -102,7 +121,7 @@ Documentação viva: [`docs/USER_JOURNEY.md`](docs/USER_JOURNEY.md) · skill Cur
 
 ---
 
-## Caminho A — Só testar (APK)
+## 📲 Caminho A — Só testar (APK)
 
 1. Baixe o APK preview mais recente:  
    **https://github.com/eritonLongui/Orbita---react-native/releases/tag/preview-fb2127fd**  
@@ -117,7 +136,7 @@ O APK de **preview** é assinado com o certificado EAS cadastrado no Firebase �
 
 ---
 
-## Caminho B — Desenvolver localmente
+## 💻 Caminho B — Desenvolver localmente
 
 ### Pré-requisitos
 
@@ -140,14 +159,15 @@ npm run setup:ios          # primeira vez no Mac: gera pasta ios/
 ```
 
 ### Rodar
+Abra dois terminais na raiz do projeto:
 
-**Terminal 1:**
+**Terminal I:**
 
 ```bash
 npm start
 ```
 
-**Terminal 2:**
+**Terminal II:**
 
 ```bash
 npm run ios       # Simulador iOS (Mac)
@@ -155,7 +175,7 @@ npm run ios       # Simulador iOS (Mac)
 npm run android   # Emulador Android
 ```
 
-### Notas importantes
+### Notas 
 
 - **Sem `.env` obrigatório** — chaves públicas em [`src/config/publicEnv.ts`](src/config/publicEnv.ts).
 - **Não use Expo Go** — use dev client (`npm run ios` / `android`).
@@ -203,10 +223,19 @@ npm run build:preview
 
 Cadastre o **SHA-1 do build EAS** no Firebase (uma vez) — veja [`docs/PRODUCTION.md`](docs/PRODUCTION.md).
 
----
+## 📚 Documentação
 
-## Scripts npm
+### Guias do Projeto:
+| Arquivo | Conteúdo |
+|---------|----------|
+| [`docs/APRESENTACAO_EQUIPE.md`](docs/APRESENTACAO_EQUIPE.md) | Roteiro para apresentação do projeto |
+| [`docs/APRESENTACAO_EQUIPE.md`](docs/APRESENTACAO_EQUIPE.md) | Roteiro para apresentação do time |
+| [`docs/USER_JOURNEY.md`](docs/USER_JOURNEY.md) | Jornada, narrativa e backlog UX |
+| [`docs/GOOGLE_LOGIN.md`](docs/GOOGLE_LOGIN.md) | Login Google e `DEVELOPER_ERROR` |
+| [`docs/PRODUCTION.md`](docs/PRODUCTION.md) | Distribuição, EAS e usuários finais |
+| [`docs/SECRETS.md`](docs/SECRETS.md) | Variáveis de ambiente |
 
+### Principais Scripts npm:
 | Comando | Descrição |
 |---------|-----------|
 | `npm run setup` | Instala deps + valida arquivos e Supabase |
@@ -222,23 +251,9 @@ Cadastre o **SHA-1 do build EAS** no Firebase (uma vez) — veja [`docs/PRODUCTI
 | `npm run build:preview:ios-simulator` | Build iOS simulador (EAS) |
 | `npm run auth:fingerprints` | SHA-1 local (dev Android) |
 | `npm run reset:native` | Regenera `ios/` e `android/` |
-
 ---
 
-## Documentação
-
-| Arquivo | Conteúdo |
-|---------|----------|
-| [`docs/APRESENTACAO_EQUIPE.md`](docs/APRESENTACAO_EQUIPE.md) | Roteiro para apresentação do projeto |
-| [`docs/APRESENTACAO_EQUIPE.md`](docs/APRESENTACAO_EQUIPE.md) | Roteiro para apresentação do time |
-| [`docs/USER_JOURNEY.md`](docs/USER_JOURNEY.md) | Jornada, narrativa e backlog UX |
-| [`docs/GOOGLE_LOGIN.md`](docs/GOOGLE_LOGIN.md) | Login Google e `DEVELOPER_ERROR` |
-| [`docs/PRODUCTION.md`](docs/PRODUCTION.md) | Distribuição, EAS e usuários finais |
-| [`docs/SECRETS.md`](docs/SECRETS.md) | Variáveis de ambiente |
-
----
-
-## Estrutura do projeto
+## 📂 Estrutura do projeto
 
 ```
 src/
@@ -258,5 +273,5 @@ assets/          # ícones, logos, login-planet.png
 ---
 
 ## Licença
-
-Ver [`LICENSE`](LICENSE).
+ 
+Distribuído sob a licença MIT. Veja [`LICENSE`](LICENSE) para mais detalhes.
