@@ -39,7 +39,7 @@ export function MissionScreen() {
 
   return (
     <ScreenWrapper tabBarOffset>
-      <YStack gap="$6">
+      <YStack gap="$6" pb="$14" pt="$4" px="$2">
         <HomeHeader name={name} photoUrl={getProfilePhotoUrl(profile, user)} />
 
         <MissionStatusCard

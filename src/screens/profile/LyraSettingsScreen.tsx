@@ -45,7 +45,7 @@ export function LyraSettingsScreen() {
     <ScreenWrapper tabBarOffset scrollable={false}>
       <SettingsBackHeader title="Lyra" />
 
-      <YStack gap="$5">
+      <YStack gap="$5" pt="$4" px="$2">
         {saveError ? (
           <Text fontSize={13} color="$red10" lineHeight={18}>
             {saveError}

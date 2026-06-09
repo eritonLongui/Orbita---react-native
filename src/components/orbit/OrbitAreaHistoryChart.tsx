@@ -46,7 +46,7 @@ export function OrbitAreaHistoryChart({ history, status }: OrbitAreaHistoryChart
         <BarChart
           data={barData}
           height={156}
-          barWidth={28}
+          barWidth={24}
           spacing={12}
           roundedTop
           roundedBottom

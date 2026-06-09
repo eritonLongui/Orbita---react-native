@@ -50,7 +50,7 @@ export function ProfileHomeScreen() {
 
   return (
     <ScreenWrapper tabBarOffset>
-      <YStack gap="$5">
+      <YStack gap="$5" pt="$4" px="$2">
         <Text fontSize={28} fontWeight="800" color="$text">
           Minha conta
         </Text>

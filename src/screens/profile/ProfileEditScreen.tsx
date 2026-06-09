@@ -84,7 +84,7 @@ export function ProfileEditScreen() {
     <ScreenWrapper tabBarOffset>
       <SettingsBackHeader title="Editar perfil" />
 
-      <YStack gap="$5">
+      <YStack gap="$5" pt="$4" px="$2">
         {error ? (
           <Text fontSize={13} color="$red10" lineHeight={18}>
             {error}

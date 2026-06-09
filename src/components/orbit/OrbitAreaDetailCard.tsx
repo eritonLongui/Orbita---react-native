@@ -91,7 +91,7 @@ export function OrbitAreaDetailCard({ detail }: OrbitAreaDetailCardProps) {
                 </YStack>
               </XStack>
 
-              <XStack items="center" gap="$2">
+              <XStack items="center" gap="$3">
                 <YStack
                   minW={52}
                   items="center"

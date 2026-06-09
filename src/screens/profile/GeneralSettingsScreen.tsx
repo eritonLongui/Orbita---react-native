@@ -69,7 +69,7 @@ export function GeneralSettingsScreen() {
     <ScreenWrapper tabBarOffset>
       <SettingsBackHeader title="Configurações gerais" />
 
-      <YStack gap="$4">
+      <YStack gap="$4" pt="$4" px="$2">
         {saveError ? (
           <Text fontSize={13} color="$red10" lineHeight={18}>
             {saveError}

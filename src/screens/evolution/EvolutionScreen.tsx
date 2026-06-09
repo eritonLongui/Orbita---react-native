@@ -20,7 +20,7 @@ export function EvolutionScreen() {
 
   return (
     <ScreenWrapper tabBarOffset>
-      <YStack gap="$5">
+      <YStack gap="$6" pb="$14" pt="$4" px="$2">
         <YStack gap="$2">
           <Text fontSize={28} fontWeight="800" color="$text">
             Evolução

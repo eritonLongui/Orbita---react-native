@@ -44,7 +44,7 @@ export function SecurityPrivacyScreen() {
     <ScreenWrapper tabBarOffset>
       <SettingsBackHeader title="Segurança" />
 
-      <YStack gap="$4">
+      <YStack gap="$4" pt="$4" px="$2">
         <OrbitaCard>
           <YStack gap="$2">
             <Text fontSize={15} fontWeight="700" color="$text">

@@ -20,7 +20,7 @@ export function OrbitScreen() {
 
   return (
     <ScreenWrapper tabBarOffset>
-      <YStack gap="$5">
+      <YStack gap="$5" pb="$14" pt="$4" px="$2">
         <Text fontSize={28} fontWeight="800" color="$text">
           Minha Órbita
         </Text>

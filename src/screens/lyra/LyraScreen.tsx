@@ -98,7 +98,7 @@ export function LyraScreen() {
 
   return (
     <ScreenWrapper scrollable={false} tabBarOffset>
-      <YStack flex={1}>
+      <YStack flex={1} pt="$4" px="$2">
         <YStack items="center" gap="$2" mb="$6">
           <Text fontSize={14} color="$textMuted">
             Lyra

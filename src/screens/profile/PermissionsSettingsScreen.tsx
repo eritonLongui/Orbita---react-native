@@ -71,7 +71,7 @@ export function PermissionsSettingsScreen() {
     <ScreenWrapper tabBarOffset>
       <SettingsBackHeader title="Permissões" />
 
-      <YStack gap="$4">
+      <YStack gap="$4" pt="$4" px="$2">
         <OrbitaCard>
           <YStack gap="$3">
             <XStack justify="space-between" items="center">
