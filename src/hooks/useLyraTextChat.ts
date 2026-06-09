@@ -2,10 +2,12 @@ import { useCallback, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getLyraVoiceConfigFromProfile } from '../constants/lyraVoice';
 import { pickChatImage } from '../services/chatImage';
-import { CHECK_IN_OPENING_FALLBACK, getCheckInAreasCovered } from '../services/checkIn';
+import { buildCheckInOpening } from '../services/checkIn';
 import { sendToLyra } from '../services/conversation';
 import { useAuth } from '../providers/AuthProvider';
 import { useLyraState } from '../providers/LyraStateProvider';
+import { processStructuredCheckInTurn } from '../utils/checkInFlow';
+import { subscribeLyraTextChatClear } from '../services/lyraTextChatSession';
 import { processCheckInResponse } from '../utils/checkInResponse';
 
 export interface ChatMessage {
@@ -43,6 +45,13 @@ export function useLyraTextChat(options?: UseLyraTextChatOptions) {
 
   useEffect(() => {
     void AsyncStorage.removeItem('lyra_text_messages');
+  }, []);
+
+  useEffect(() => {
+    return subscribeLyraTextChatClear(() => {
+      setMessages([]);
+      setError(null);
+    });
   }, []);
 
   useEffect(() => {
@@ -87,20 +96,28 @@ export function useLyraTextChat(options?: UseLyraTextChatOptions) {
       setError(null);
 
       try {
-        const areasCovered = checkInMode ? await getCheckInAreasCovered() : undefined;
-        const response = await sendToLyra({
-          text: trimmed || undefined,
-          imageBase64: image?.base64,
-          imageMimeType: image?.mimeType,
-          voiceEnabled: false,
-          voiceStyle: voiceConfig.style,
-          voiceAccent: voiceConfig.accent,
-          checkInMode: checkInMode && !image,
-          areasCovered,
-        });
+        let response;
+
+        if (checkInMode && !image) {
+          response = await processStructuredCheckInTurn({
+            text: trimmed,
+            voiceEnabled: false,
+            voiceStyle: voiceConfig.style,
+            voiceAccent: voiceConfig.accent,
+          });
+        } else {
+          response = await sendToLyra({
+            text: trimmed || undefined,
+            imageBase64: image?.base64,
+            imageMimeType: image?.mimeType,
+            voiceEnabled: false,
+            voiceStyle: voiceConfig.style,
+            voiceAccent: voiceConfig.accent,
+          });
+        }
 
         appendLyraMessage(response.reply);
-        await processCheckInResponse(response, checkInMode, options?.onCheckInComplete);
+        await processCheckInResponse(response, checkInMode && !image, options?.onCheckInComplete);
       } catch (e) {
         console.warn('sendMessage failed:', e);
         setError(e instanceof Error ? e.message : 'Erro ao enviar mensagem.');
@@ -118,25 +135,14 @@ export function useLyraTextChat(options?: UseLyraTextChatOptions) {
     setError(null);
 
     try {
-      const areasCovered = await getCheckInAreasCovered();
-      const response = await sendToLyra({
-        text: 'Iniciar check-in',
-        checkInMode: true,
-        initiateCheckIn: true,
-        areasCovered,
-        voiceEnabled: false,
-        voiceStyle: voiceConfig.style,
-        voiceAccent: voiceConfig.accent,
-      });
-
-      appendLyraMessage(response.reply);
-      await processCheckInResponse(response, true, options?.onCheckInComplete);
+      const opening = buildCheckInOpening();
+      appendLyraMessage(opening.reply);
+      await processCheckInResponse(opening, true, options?.onCheckInComplete);
       return true;
     } catch (e) {
-      console.warn('initiateCheckIn failed, using local opening:', e);
-      appendLyraMessage(CHECK_IN_OPENING_FALLBACK.reply);
-      await processCheckInResponse(CHECK_IN_OPENING_FALLBACK, true, options?.onCheckInComplete);
-      return true;
+      console.warn('initiateCheckIn failed:', e);
+      setError(e instanceof Error ? e.message : 'Erro ao iniciar check-in.');
+      return false;
     } finally {
       setIsLoading(false);
     }
@@ -165,6 +171,7 @@ export function useLyraTextChat(options?: UseLyraTextChatOptions) {
     isLoading,
     error,
     sendMessage,
+    appendLyraMessage,
     initiateCheckIn,
     pickImage,
     clearMessages,

@@ -1,6 +1,6 @@
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
-import { MotiView } from 'moti';
+import { MotiView, AnimatePresence } from 'moti';
 import React, { useMemo } from 'react';
 import { Pressable, StyleSheet, View, type ViewStyle } from 'react-native';
 import { themeColors } from '../../constants/theme';
@@ -48,67 +48,67 @@ const METRICS: Record<LyraOrbSize, OrbMetrics> = {
 type OrbVisualState = 'idle' | 'listening' | 'thinking';
 
 function mapState(state: LyraSessionState): OrbVisualState {
-  if (state === 'recording' || state === 'processing') return 'listening';
-  if (state === 'responding') return 'thinking';
+  if (state === 'recording') return 'listening';
+  if (state === 'processing' || state === 'responding') return 'thinking';
   return 'idle';
 }
 
-interface LyraOrbProps {
-  state: LyraSessionState;
-  size?: LyraOrbSize;
-  onPress?: () => void;
-  pressable?: boolean;
-  style?: ViewStyle;
-}
+const BAR_COUNT = 5;
+const BAR_WIDTH = 6;
+const BAR_GAP = 5;
+const BAR_MAX_HEIGHT = 44;
+const BAR_MIN_HEIGHT = 10;
+const BAR_RADIUS = 3;
 
-function RobotEyes({
-  visual,
-  metrics,
-}: {
-  visual: OrbVisualState;
-  metrics: OrbMetrics;
-}) {
-  const motion = useMemo(() => {
-    if (visual === 'listening') {
-      return {
-        grow: [1, 1.22, 1.08, 1.22, 1] as number[],
-        growDuration: 700,
-        blink: [1, 1, 1, 0.08, 1, 1] as number[],
-        blinkDuration: 3200,
-      };
-    }
-    if (visual === 'thinking') {
-      return {
-        grow: [1, 1.1, 1, 1.1, 1] as number[],
-        growDuration: 1100,
-        blink: [1, 0.08, 1, 1, 0.08, 1, 1] as number[],
-        blinkDuration: 2000,
-      };
-    }
-    return {
-      grow: 1,
-      growDuration: 0,
-      blink: [1, 1, 1, 1, 1, 0.08, 1, 1] as number[],
-      blinkDuration: 5200,
-    };
-  }, [visual]);
+function AudioWaveformBars() {
+  const bars = useMemo(() => {
+    return Array.from({ length: BAR_COUNT }, (_, i) => {
+      const heights = [BAR_MIN_HEIGHT, BAR_MAX_HEIGHT * 0.6, BAR_MAX_HEIGHT, BAR_MAX_HEIGHT * 0.5, BAR_MIN_HEIGHT];
+      return { heights };
+    });
+  }, []);
 
   return (
     <MotiView
-      animate={{ scale: motion.grow }}
-      transition={{
-        type: 'timing',
-        duration: motion.growDuration || 1,
-        loop: visual !== 'idle',
-      }}
+      from={{ scale: 0.5, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      exit={{ scale: 0.5, opacity: 0 }}
+      transition={{ type: 'spring', damping: 12, stiffness: 150 }}
+      style={styles.barsRow}
+    >
+      {bars.map((bar, i) => (
+        <MotiView
+          key={i}
+          from={{ height: BAR_MIN_HEIGHT }}
+          animate={{ height: bar.heights }}
+          transition={{
+            type: 'timing',
+            duration: 600,
+            delay: i * 80,
+            loop: true,
+          }}
+          style={{
+            width: BAR_WIDTH,
+            borderRadius: BAR_RADIUS,
+            backgroundColor: '#FFFFFF',
+          }}
+        />
+      ))}
+    </MotiView>
+  );
+}
+
+function RobotEyes({ metrics }: { metrics: OrbMetrics }) {
+  return (
+    <MotiView
+      from={{ scale: 0.5, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      exit={{ scale: 0.5, opacity: 0 }}
+      transition={{ type: 'spring', damping: 12, stiffness: 150 }}
     >
       <MotiView
-        animate={{ scaleY: motion.blink }}
-        transition={{
-          type: 'timing',
-          duration: motion.blinkDuration,
-          loop: true,
-        }}
+        animate={{ scaleY: [1, 1, 1, 1, 1, 0.08, 1, 1] }}
+        transition={{ type: 'timing', duration: 5200, loop: true }}
       >
         <View style={[styles.eyesRow, { gap: metrics.eyeGap }]}>
           <View
@@ -133,6 +133,14 @@ function RobotEyes({
   );
 }
 
+interface LyraOrbProps {
+  state: LyraSessionState;
+  size?: LyraOrbSize;
+  onPress?: () => void;
+  pressable?: boolean;
+  style?: ViewStyle;
+}
+
 export function LyraOrb({
   state,
   size = 'full',
@@ -142,6 +150,7 @@ export function LyraOrb({
 }: LyraOrbProps) {
   const visual = mapState(state);
   const metrics = METRICS[size];
+  const isRecording = visual === 'listening';
 
   const motion = useMemo(() => {
     if (visual === 'listening') {
@@ -322,7 +331,13 @@ export function LyraOrb({
               <View style={styles.nebulaB} />
             </>
           ) : null}
-          <RobotEyes visual={visual} metrics={metrics} />
+          <AnimatePresence exitBeforeEnter>
+            {isRecording && size === 'full' ? (
+              <AudioWaveformBars key="bars" />
+            ) : (
+              <RobotEyes key="eyes" metrics={metrics} />
+            )}
+          </AnimatePresence>
         </LinearGradient>
       </MotiView>
 
@@ -345,6 +360,12 @@ const styles = StyleSheet.create({
   eyesRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    zIndex: 2,
+  },
+  barsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: BAR_GAP,
     zIndex: 2,
   },
   shellHighlight: {

@@ -2,7 +2,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import React, { useEffect, useState } from 'react';
 import { Spinner, YStack } from 'tamagui';
 import { GlassTabBar } from '../components/navigation/GlassTabBar';
-import { EvolutionScreen } from '../screens/evolution/EvolutionScreen';
+import { AchievementsScreen } from '../screens/achievements/AchievementsScreen';
 import { LyraScreen } from '../screens/lyra/LyraScreen';
 import { MissionScreen } from '../screens/mission/MissionScreen';
 import { OrbitScreen } from '../screens/orbit/OrbitScreen';
@@ -40,7 +40,7 @@ export function MainTabNavigator() {
       <Tab.Screen name="Mission" component={MissionScreen} />
       <Tab.Screen name="Orbit" component={OrbitScreen} />
       <Tab.Screen name="Lyra" component={LyraScreen} />
-      <Tab.Screen name="Evolution" component={EvolutionScreen} />
+      <Tab.Screen name="Achievements" component={AchievementsScreen} />
       <Tab.Screen name="Profile" component={ProfileStackNavigator} />
     </Tab.Navigator>
   );

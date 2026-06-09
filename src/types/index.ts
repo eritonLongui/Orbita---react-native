@@ -82,12 +82,60 @@ export interface ConversationMessage {
   created_at: string;
 }
 
+export interface SleepAnswers {
+  bedTime: string;
+  wakeTime: string;
+  quality: number;
+}
+
+export interface EnergyAnswers {
+  energyLevel: number;
+  fatigueLevel: number;
+}
+
+export interface RoutineAnswers {
+  screenHours: number;
+  regularSchedule: boolean;
+  organization: number;
+}
+
+export interface NutritionAnswers {
+  meals: number;
+  waterGlasses: number;
+  foodQuality: number;
+}
+
+export interface WellbeingAnswers {
+  mood: number;
+  stress: number;
+  anxiety: number;
+}
+
+export interface CheckInAnswers {
+  sleep: SleepAnswers;
+  energy: EnergyAnswers;
+  routine: RoutineAnswers;
+  nutrition: NutritionAnswers;
+  wellbeing: WellbeingAnswers;
+}
+
+export interface DailyTask {
+  id: string;
+  area: PillarType;
+  title: string;
+  done: boolean;
+  createdAt: string;
+}
+
 export interface LyraChatResponse {
   transcript?: string;
   reply: string;
   audioBase64?: string;
   checkInComplete?: boolean;
   areasCovered?: string[];
+  repeat?: boolean;
+  dailyTasks?: DailyTask[];
+  areaScores?: Partial<Record<PillarType, number>>;
 }
 
 export interface Milestone {

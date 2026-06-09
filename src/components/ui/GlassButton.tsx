@@ -51,11 +51,7 @@ export function GlassButton({
           fontWeight="700"
           fontSize={16}
           style={{
-            color: isDisabled
-              ? themeColors.textSubtle
-              : isPrimary
-                ? themeColors.text
-                : themeColors.textMuted,
+            color: isDisabled ? themeColors.textSubtle : themeColors.text,
           }}
         >
           {label}

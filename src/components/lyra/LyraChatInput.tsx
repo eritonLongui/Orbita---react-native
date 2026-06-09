@@ -94,6 +94,7 @@ const styles = StyleSheet.create({
   wrapper: {
     gap: 8,
     paddingTop: 8,
+    paddingBottom: 0,
   },
   previewRow: {
     alignSelf: 'flex-start',

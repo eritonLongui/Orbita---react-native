@@ -2,6 +2,12 @@ import { MissionHeroState } from '../types';
 import { MISSION_HERO_COPY } from './orbitAreas';
 import { JourneyUserState } from '../services/journey';
 
+export const CHECK_IN_PENDING_COPY = {
+  title: 'Hora do check-in',
+  description:
+    'Registre como foi seu dia e receba ações personalizadas da Lyra para evoluir sua órbita.',
+};
+
 const NEW_USER_COPY = {
   title: 'Sua missão começa hoje',
   description: 'Converse com a Lyra para mapear sua órbita e receber os primeiros insights.',

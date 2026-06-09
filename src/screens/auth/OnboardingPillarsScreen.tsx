@@ -1,6 +1,8 @@
 import { Moon, PersonSimpleRun, Clock, Drop, GameController } from 'phosphor-react-native';
 import React, { useState } from 'react';
 import { Text, XStack, YStack } from 'tamagui';
+import { OnboardingPreviewCloseButton } from '../../components/onboarding/OnboardingPreviewCloseButton';
+import { themeColors } from '../../constants/theme';
 import { PrimaryButton } from '../../components/ui/PrimaryButton';
 import { ScreenWrapper } from '../../components/ui/ScreenWrapper';
 import { ORBIT_AREAS } from '../../constants/orbitAreas';
@@ -9,15 +11,17 @@ const ICONS = [Moon, PersonSimpleRun, Clock, Drop, GameController];
 
 interface OnboardingPillarsScreenProps {
   onContinue: () => void;
+  onClose?: () => void;
 }
 
-export function OnboardingPillarsScreen({ onContinue }: OnboardingPillarsScreenProps) {
+export function OnboardingPillarsScreen({ onContinue, onClose }: OnboardingPillarsScreenProps) {
   const [step, setStep] = useState(0);
 
   if (step === 0) {
     return (
       <ScreenWrapper>
         <YStack gap="$5" py="$2">
+          {onClose ? <OnboardingPreviewCloseButton onClose={onClose} /> : null}
           <YStack gap="$2">
             <Text fontSize={28} fontWeight="800" color="$text">
               Sua órbita
@@ -46,11 +50,13 @@ export function OnboardingPillarsScreen({ onContinue }: OnboardingPillarsScreenP
                     width={44}
                     height={44}
                     rounded={999}
-                    bg="$primaryBg"
+                    bg="$glassButton"
+                    borderWidth={1}
+                    borderColor="$glassBorder"
                     items="center"
                     justify="center"
                   >
-                    <Icon size={22} color="#F39500" weight="duotone" />
+                    <Icon size={22} color={themeColors.text} weight="regular" />
                   </YStack>
                   <YStack flex={1} gap="$1">
                     <Text fontSize={15} fontWeight="700" color="$text">
@@ -74,6 +80,7 @@ export function OnboardingPillarsScreen({ onContinue }: OnboardingPillarsScreenP
   return (
     <ScreenWrapper scrollable={false}>
       <YStack flex={1} justify="space-between" py="$4">
+        {onClose ? <OnboardingPreviewCloseButton onClose={onClose} /> : null}
         <YStack flex={1} justify="center" gap="$5">
           <YStack gap="$2">
             <Text fontSize={28} fontWeight="800" color="$text">

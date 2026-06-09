@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
+import { MOCK_VISIT_STREAK } from '../constants/orbitAreas';
+import { useMockData } from '../providers/MockDataProvider';
 import { isTodayCheckInComplete } from '../services/checkIn';
 import {
   getVisitStreak,
@@ -19,6 +21,7 @@ interface JourneyState {
 }
 
 export function useJourney() {
+  const { enabled: mockDataEnabled } = useMockData();
   const [state, setState] = useState<JourneyState>({
     firstLyraCompleted: false,
     firstLyraPending: false,
@@ -29,6 +32,18 @@ export function useJourney() {
   });
 
   const refresh = useCallback(async () => {
+    if (mockDataEnabled) {
+      setState({
+        firstLyraCompleted: true,
+        firstLyraPending: false,
+        todayCheckInComplete: true,
+        showTabLabels: false,
+        visitStreak: MOCK_VISIT_STREAK,
+        loaded: true,
+      });
+      return;
+    }
+
     const [firstLyraCompleted, firstLyraPending, todayCheckInComplete, showTabLabels, visitStreak] =
       await Promise.all([
         hasCompletedFirstLyraSession(),
@@ -45,13 +60,18 @@ export function useJourney() {
       visitStreak,
       loaded: true,
     });
-  }, []);
+  }, [mockDataEnabled]);
 
   const trackMissionVisit = useCallback(async () => {
+    if (mockDataEnabled) {
+      setState((prev) => ({ ...prev, visitStreak: MOCK_VISIT_STREAK, loaded: true }));
+      return MOCK_VISIT_STREAK;
+    }
+
     const visitStreak = await recordMissionVisit();
     setState((prev) => ({ ...prev, visitStreak, loaded: true }));
     return visitStreak;
-  }, []);
+  }, [mockDataEnabled]);
 
   useEffect(() => {
     void refresh();

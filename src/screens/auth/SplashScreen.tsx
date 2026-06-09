@@ -4,12 +4,10 @@ import { useEffect } from "react";
 import { StyleSheet } from "react-native";
 import { Easing } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Text, YStack } from "tamagui";
+import { YStack } from "tamagui";
 
 import { AppBackground } from "../../components/ui/AppBackground";
-import { GradientText } from "../../components/ui/GradientText";
 import { OrbitaLogo } from "../../components/ui/OrbitaLogo";
-import { themeColors } from "../../constants/theme";
 
 interface SplashScreenProps {
   onFinish: () => void;
@@ -114,57 +112,6 @@ export function SplashScreen({ onFinish }: SplashScreenProps) {
             <OrbitaLogo size={120} />
           </MotiView>
         </MotiView>
-
-        {/* Agrupamento Tipográfico */}
-        <YStack items="center" gap="$2" mt="$7">
-          <MotiView
-            from={{
-              opacity: 0,
-              translateY: 15,
-            }}
-            animate={{
-              opacity: 1,
-              translateY: 0,
-            }}
-            transition={{
-              type: "spring",
-              damping: 20,
-              stiffness: 100,
-              delay: 400, // Sincronizado com o assentamento do logo
-            }}
-          >
-            <GradientText fontSize={32} fontWeight="800" letterSpacing={8}>
-              ORBITA
-            </GradientText>
-          </MotiView>
-
-          <MotiView
-            from={{
-              opacity: 0,
-              translateY: 10,
-            }}
-            animate={{
-              opacity: 1,
-              translateY: 0,
-            }}
-            transition={{
-              type: "spring",
-              damping: 20,
-              stiffness: 100,
-              delay: 550, // Micro-delay em relação ao título principal
-            }}
-          >
-            <Text
-              fontSize={11}
-              fontWeight="600"
-              color={themeColors.textSecondary}
-              letterSpacing={6} // Ligeiro aumento para dar mais estabilidade à base
-              opacity={0.6} // Opacidade nativa reduzida para maior contraste hierárquico
-            >
-              SEU COPILOTO
-            </Text>
-          </MotiView>
-        </YStack>
       </YStack>
     </AppBackground>
   );

@@ -54,11 +54,9 @@ export function MissionStatusCard({ title, description, onPress }: MissionStatus
 
 const styles = StyleSheet.create({
   gradient: {
-    borderRadius: 24,
+    borderRadius: 16,
     padding: 20,
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(140, 200, 255, 0.45)',
     minHeight: 148,
   },
   decorIcon: {

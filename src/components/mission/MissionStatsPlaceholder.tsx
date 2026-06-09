@@ -1,14 +1,18 @@
 import { Planet } from 'phosphor-react-native';
 import React from 'react';
 import { Text, YStack } from 'tamagui';
+import { TalkToLyraButton } from '../lyra/TalkToLyraButton';
 import { OrbitaCard } from '../ui/OrbitaCard';
+import { SectionTitle } from '../ui/SectionTitle';
 
-export function MissionStatsPlaceholder() {
+interface MissionStatsPlaceholderProps {
+  onTalkToLyra?: () => void;
+}
+
+export function MissionStatsPlaceholder({ onTalkToLyra }: MissionStatsPlaceholderProps) {
   return (
     <YStack gap="$3">
-      <Text fontSize={13} fontWeight="800" letterSpacing={1.2} color="$textMuted">
-        RESUMO DA MINHA ÓRBITA
-      </Text>
+      <SectionTitle>Resumo da minha órbita</SectionTitle>
       <OrbitaCard>
         <YStack gap="$3" items="center" py="$2">
           <Planet size={32} color="#6B7280" />
@@ -20,6 +24,7 @@ export function MissionStatsPlaceholder() {
           </Text>
         </YStack>
       </OrbitaCard>
+      {onTalkToLyra ? <TalkToLyraButton variant="outline" onPress={onTalkToLyra} /> : null}
     </YStack>
   );
 }

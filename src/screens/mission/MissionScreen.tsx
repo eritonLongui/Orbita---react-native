@@ -1,20 +1,26 @@
 import React, { useCallback } from 'react';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import * as Haptics from 'expo-haptics';
 import { Spinner, Text, YStack } from 'tamagui';
 import { HomeHeader } from '../../components/mission/HomeHeader';
 import { HomeStatsGrid } from '../../components/mission/HomeStatsGrid';
 import { MissionDayCard } from '../../components/mission/MissionDayCard';
 import { MissionStatsPlaceholder } from '../../components/mission/MissionStatsPlaceholder';
 import { MissionStatusCard } from '../../components/mission/MissionStatusCard';
-import { TodayChecklist } from '../../components/mission/TodayChecklist';
+import { SmartTaskList } from '../../components/mission/SmartTaskList';
 import { InsightCard } from '../../components/orbit';
 import { ScreenWrapper } from '../../components/ui/ScreenWrapper';
-import { getMissionHeroCopy } from '../../constants/missionCopy';
+import { SectionTitle } from '../../components/ui/SectionTitle';
+import { CHECK_IN_PENDING_COPY, getMissionHeroCopy } from '../../constants/missionCopy';
+import { TalkToLyraButton } from '../../components/lyra/TalkToLyraButton';
+import { useDailyTasks } from '../../hooks/useDailyTasks';
 import { useJourney } from '../../hooks/useJourney';
 import { useOrbitStatus } from '../../hooks/useOrbitStatus';
 import { MainTabParamList } from '../../navigation/types';
+import { MOCK_MISSION_DAY } from '../../constants/orbitAreas';
 import { useAuth } from '../../providers/AuthProvider';
+import { useMockData } from '../../providers/MockDataProvider';
 import { resolveJourneyState } from '../../services/journey';
 import { getMissionNumber } from '../../utils/greeting';
 import { getProfilePhotoUrl } from '../../utils/profilePhoto';
@@ -22,6 +28,7 @@ import { getProfilePhotoUrl } from '../../utils/profilePhoto';
 export function MissionScreen() {
   const navigation = useNavigation<BottomTabNavigationProp<MainTabParamList>>();
   const { profile, user } = useAuth();
+  const { enabled: mockDataEnabled } = useMockData();
   const { loading, heroState, areas, insight, hasData } = useOrbitStatus();
   const {
     firstLyraCompleted,
@@ -31,21 +38,45 @@ export function MissionScreen() {
     refresh,
     trackMissionVisit,
   } = useJourney();
+  const { tasks, refresh: refreshTasks, toggleDone } = useDailyTasks();
   const name = profile?.full_name?.split(' ')[0] ?? 'Comandante';
-  const missionNumber = getMissionNumber(profile?.created_at);
+  const missionNumber = mockDataEnabled
+    ? MOCK_MISSION_DAY
+    : getMissionNumber(profile?.created_at);
 
   useFocusEffect(
     useCallback(() => {
       void (async () => {
         await trackMissionVisit();
         await refresh();
+        await refreshTasks();
       })();
-    }, [refresh, trackMissionVisit]),
+    }, [refresh, refreshTasks, trackMissionVisit]),
   );
 
   const journeyState = resolveJourneyState(hasData, firstLyraCompleted);
-  const heroCopy = getMissionHeroCopy(journeyState, heroState);
-  const checkInDone = todayCheckInComplete || hasData;
+  const checkInDone = todayCheckInComplete;
+  const heroCopy = checkInDone
+    ? getMissionHeroCopy(journeyState, heroState)
+    : CHECK_IN_PENDING_COPY;
+
+  const openCheckIn = () => {
+    navigation.navigate('Lyra', { openCheckIn: true });
+  };
+
+  const handleToggleTask = useCallback(
+    (taskId: string) => {
+      const task = tasks.find((t) => t.id === taskId);
+      if (!task) return;
+
+      if (!task.done) {
+        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      }
+
+      toggleDone(taskId);
+    },
+    [tasks, toggleDone],
+  );
 
   if (loading || !journeyLoaded) {
     return (
@@ -67,29 +98,31 @@ export function MissionScreen() {
         <MissionStatusCard
           title={heroCopy.title}
           description={heroCopy.description}
-          onPress={() => navigation.navigate('Lyra')}
+          onPress={checkInDone ? () => navigation.navigate('Lyra') : openCheckIn}
         />
 
-        {!hasData ? (
-          <TodayChecklist
-            checkInDone={checkInDone}
-            onPressCheckIn={() => navigation.navigate('Lyra')}
-          />
-        ) : null}
+        <SmartTaskList
+          tasks={tasks}
+          checkInDone={checkInDone}
+          onPressCheckIn={openCheckIn}
+          onToggleTask={(id) => void handleToggleTask(id)}
+        />
 
         {hasData ? (
           <YStack gap="$3">
-            <Text fontSize={13} fontWeight="800" letterSpacing={1.2} color="$textMuted">
-              RESUMO DA MINHA ÓRBITA
-            </Text>
-            <HomeStatsGrid areas={areas} />
+            <SectionTitle>Resumo da minha órbita</SectionTitle>
+            <HomeStatsGrid areas={areas} missionDay={missionNumber} />
+            <TalkToLyraButton
+              variant="outline"
+              onPress={() => navigation.navigate('Lyra')}
+            />
           </YStack>
         ) : (
-          <MissionStatsPlaceholder />
+          <MissionStatsPlaceholder onTalkToLyra={() => navigation.navigate('Lyra')} />
         )}
 
         {hasData && insight.trim() ? (
-          <InsightCard insight={insight} title="Insight do dia" />
+          <InsightCard insight={insight} title="Insight do dia" variant="banner" />
         ) : null}
       </YStack>
     </ScreenWrapper>

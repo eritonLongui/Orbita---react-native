@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import {
   Planet,
   RocketLaunch,
-  TrendUp,
+  Trophy,
   User,
 } from 'phosphor-react-native';
 import React from 'react';
@@ -22,6 +22,9 @@ const BAR_PADDING_H = 10;
 export const TAB_BAR_VISUAL_HEIGHT = CIRCLE_SIZE + BAR_PADDING_V * 2;
 export const TAB_BAR_HORIZONTAL_MARGIN = 12;
 export const TAB_BAR_BOTTOM_GAP = 8;
+/** Espaço total da tab bar flutuante acima do safe area (orb Lyra + labels + padding). */
+export const TAB_BAR_FLOATING_CLEARANCE =
+  TAB_BAR_BOTTOM_GAP + BAR_PADDING_V * 2 + LYRA_TAB_ORB_SIZE + 8 + 14 + 8;
 
 type TabRoute = keyof MainTabParamList;
 type StandardTabRoute = Exclude<TabRoute, 'Lyra'>;
@@ -32,7 +35,7 @@ const TAB_ICONS: Record<
 > = {
   Mission: RocketLaunch,
   Orbit: Planet,
-  Evolution: TrendUp,
+  Achievements: Trophy,
   Profile: User,
 };
 
@@ -40,7 +43,7 @@ const TAB_LABELS: Record<TabRoute, string> = {
   Mission: 'Missão',
   Orbit: 'Órbita',
   Lyra: 'Lyra',
-  Evolution: 'Evolução',
+  Achievements: 'Conquistas',
   Profile: 'Perfil',
 };
 

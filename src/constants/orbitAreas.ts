@@ -79,21 +79,49 @@ export const MOCK_ORBIT_AREAS: OrbitAreaSummary[] = [
   { type: 'leisure', label: 'Bem-estar', score: 48, status: 'attention' },
 ];
 
+export const MOCK_MISSION_DAY = 7;
+export const MOCK_VISIT_STREAK = 7;
+
+export const MOCK_AREA_RECOMMENDATIONS: Record<PillarType, string> = {
+  sleep: 'Deite 30 min mais cedo e evite telas após 22h.',
+  movement: 'Uma caminhada de 20 min após o almoço pode destravar sua energia.',
+  routine: 'Blindar 15 min pela manhã para planejar o dia mantém seu ritmo.',
+  nutrition: 'Inclua proteína no café da manhã e beba água antes do meio-dia.',
+  leisure: 'Reserve 30 min hoje para algo que você gosta, sem telas.',
+};
+
+const MOCK_AREA_HISTORY: Record<PillarType, number[]> = {
+  sleep: [65, 68, 70, 72, 74, 76, 78],
+  movement: [55, 58, 60, 58, 60, 61, 62],
+  routine: [62, 65, 67, 68, 69, 70, 71],
+  nutrition: [48, 50, 52, 50, 52, 54, 55],
+  leisure: [40, 42, 44, 45, 46, 47, 48],
+};
+
 export const MOCK_ORBIT_DETAILS: OrbitAreaDetail[] = ORBIT_AREAS.map((area) => {
   const mock = MOCK_ORBIT_AREAS.find((a) => a.type === area.type)!;
+  const recommendation = MOCK_AREA_RECOMMENDATIONS[area.type];
   return {
     ...mock,
     description: area.description,
-    summary: 'Você manteve regularidade na maior parte da semana.',
-    recommendation: 'Tente dormir 30 minutos mais cedo hoje.',
-    history: [52, 58, 61, 65, 68, 72, mock.score],
+    summary: '',
+    recommendation,
+    history: MOCK_AREA_HISTORY[area.type],
   };
 });
 
 export const MOCK_INSIGHT =
-  'Seu padrão de descanso caiu nos últimos 3 dias.';
+  'Seu descanso oscilou nos últimos dias — horários mais tardes podem estar pesando na energia. Tente deitar 30 min antes hoje e manter o despertar no mesmo horário.';
 
-export const MOCK_MISSION_NUMBER = 184;
+export const MOCK_HISTORICAL_INSIGHTS = [
+  MOCK_INSIGHT,
+  'Você manteve boa consistência na rotina durante esta semana.',
+  'Seu padrão de descanso melhorou após os últimos check-ins com a Lyra.',
+  'Sua energia correlacionou com os dias em que você se moveu mais.',
+];
+
+/** @deprecated Use MOCK_MISSION_DAY */
+export const MOCK_MISSION_NUMBER = MOCK_MISSION_DAY;
 
 /** @deprecated Use ORBIT_AREAS */
 export const PILLARS = ORBIT_AREAS;

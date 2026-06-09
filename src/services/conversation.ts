@@ -1,6 +1,12 @@
 import { FunctionsHttpError } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
-import { ConversationMessage, LyraChatResponse, LyraVoiceAccent, LyraVoiceStyle } from '../types';
+import {
+  CheckInAnswers,
+  ConversationMessage,
+  LyraChatResponse,
+  LyraVoiceAccent,
+  LyraVoiceStyle,
+} from '../types';
 
 export async function fetchHistory(userId: string, limit = 20): Promise<ConversationMessage[]> {
   const { data, error } = await supabase
@@ -31,9 +37,47 @@ export interface SendToLyraParams {
   checkInMode?: boolean;
   initiateCheckIn?: boolean;
   areasCovered?: string[];
+  /** Fluxo estruturado: 'opening' | 'answer' | 'tts' | 'questionnaire' */
+  structuredCheckIn?: 'opening' | 'answer' | 'tts' | 'questionnaire';
+  answerArea?: string;
+  currentQuestion?: string;
+  nextQuestion?: string;
+  isLastQuestion?: boolean;
+  questionnaireAnswers?: CheckInAnswers;
 }
 
 const LYRA_TIMEOUT_MS = 35_000;
+
+function formatLyraServerError(raw: string): string {
+  const trimmed = raw.trim();
+  const withoutPrefix = trimmed.replace(/^GPT falhou:\s*/i, '');
+
+  try {
+    const parsed = JSON.parse(withoutPrefix) as {
+      error?: { message?: string; code?: string };
+      message?: string;
+      code?: string;
+    };
+    const err = parsed.error ?? parsed;
+    const code = err?.code;
+    const message = err?.message;
+
+    if (code === 'invalid_image_format') {
+      return 'Formato de imagem não suportado. Tente outra foto (JPG ou PNG).';
+    }
+    if (message && typeof message === 'string') {
+      return message;
+    }
+  } catch {
+    // resposta não é JSON — usa texto abaixo
+  }
+
+  if (withoutPrefix.length > 0 && withoutPrefix.length < 240 && !withoutPrefix.startsWith('{')) {
+    return withoutPrefix;
+  }
+
+  return 'Não foi possível processar sua mensagem. Tente novamente.';
+}
 
 async function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
@@ -78,7 +122,7 @@ export async function sendToLyra(params: SendToLyraParams): Promise<LyraChatResp
     }
 
     if (serverDetail) {
-      message = serverDetail;
+      message = formatLyraServerError(serverDetail);
     } else if (message.includes('non-2xx')) {
       message =
         'A Lyra não respondeu. Verifique sua conexão ou tente novamente em instantes.';
@@ -89,7 +133,7 @@ export async function sendToLyra(params: SendToLyraParams): Promise<LyraChatResp
 
   const response = data as LyraChatResponse & { error?: string };
   if (response?.error) {
-    throw new Error(response.error);
+    throw new Error(formatLyraServerError(response.error));
   }
 
   if (!response?.reply) {

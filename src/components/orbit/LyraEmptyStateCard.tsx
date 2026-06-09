@@ -1,21 +1,15 @@
 import React from 'react';
 import { Text, YStack } from 'tamagui';
-import { PrimaryButton } from '../ui/PrimaryButton';
+import { TalkToLyraButton } from '../lyra/TalkToLyraButton';
 import { OrbitaCard } from '../ui/OrbitaCard';
 
 interface LyraEmptyStateCardProps {
   title: string;
   description: string;
-  ctaLabel?: string;
   onPress: () => void;
 }
 
-export function LyraEmptyStateCard({
-  title,
-  description,
-  ctaLabel = 'Ir para a Lyra',
-  onPress,
-}: LyraEmptyStateCardProps) {
+export function LyraEmptyStateCard({ title, description, onPress }: LyraEmptyStateCardProps) {
   return (
     <OrbitaCard>
       <YStack gap="$3">
@@ -25,7 +19,7 @@ export function LyraEmptyStateCard({
         <Text fontSize={14} color="$textMuted" lineHeight={20}>
           {description}
         </Text>
-        <PrimaryButton label={ctaLabel} onPress={onPress} />
+        <TalkToLyraButton onPress={onPress} />
       </YStack>
     </OrbitaCard>
   );

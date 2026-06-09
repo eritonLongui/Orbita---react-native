@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Image } from 'react-native';
 import { Input, Text, XStack, YStack } from 'tamagui';
+import { OnboardingPreviewCloseButton } from '../../components/onboarding/OnboardingPreviewCloseButton';
 import { GlassChip } from '../../components/ui/GlassChip';
 import { PrimaryButton } from '../../components/ui/PrimaryButton';
 import { ScreenWrapper } from '../../components/ui/ScreenWrapper';
@@ -11,9 +12,16 @@ import { PillarType } from '../../types';
 
 interface OnboardingProfileScreenProps {
   onComplete: () => void;
+  /** Visualização em Configurações — não grava no perfil. */
+  previewMode?: boolean;
+  onClose?: () => void;
 }
 
-export function OnboardingProfileScreen({ onComplete }: OnboardingProfileScreenProps) {
+export function OnboardingProfileScreen({
+  onComplete,
+  previewMode = false,
+  onClose,
+}: OnboardingProfileScreenProps) {
   const { user, profile, finishOnboarding } = useAuth();
   const [fullName, setFullName] = useState(profile?.full_name ?? user?.displayName ?? '');
   const [focusAreas, setFocusAreas] = useState<PillarType[]>([]);
@@ -30,6 +38,10 @@ export function OnboardingProfileScreen({ onComplete }: OnboardingProfileScreenP
     if (!acceptedTerms || !fullName.trim()) return;
     setLoading(true);
     try {
+      if (previewMode) {
+        onComplete();
+        return;
+      }
       await finishOnboarding(fullName.trim(), {
         focus_areas: focusAreas,
       });
@@ -42,6 +54,7 @@ export function OnboardingProfileScreen({ onComplete }: OnboardingProfileScreenP
   return (
     <ScreenWrapper scrollable={false}>
       <YStack flex={1} justify="space-between" gap="$5">
+        {onClose ? <OnboardingPreviewCloseButton onClose={onClose} /> : null}
         <YStack gap="$6">
           <YStack gap="$1">
             <Text fontSize={28} fontWeight="800" color="$text">

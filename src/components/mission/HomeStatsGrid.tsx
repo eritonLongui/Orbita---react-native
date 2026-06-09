@@ -25,6 +25,7 @@ import { GlassCard } from '../ui/GlassCard';
 
 interface HomeStatsGridProps {
   areas: OrbitAreaSummary[];
+  missionDay: number;
   weeklyDelta?: number;
 }
 
@@ -118,12 +119,15 @@ function StatBlock({
   );
 }
 
-export function HomeStatsGrid({ areas, weeklyDelta = 12 }: HomeStatsGridProps) {
+const MIN_DAYS_FOR_WEEKLY_TREND = 7;
+
+export function HomeStatsGrid({ areas, missionDay, weeklyDelta = 12 }: HomeStatsGridProps) {
   const orbitAvg = Math.round(areas.reduce((sum, a) => sum + a.score, 0) / areas.length);
   const balancedCount = areas.filter(
     (a) => a.status === 'balanced' || a.status === 'excellent',
   ).length;
   const focusArea = [...areas].sort((a, b) => a.score - b.score)[0];
+  const showWeeklyTrend = missionDay >= MIN_DAYS_FOR_WEEKLY_TREND;
   const trendUp = weeklyDelta >= 0;
   const FocusIcon = AREA_ICONS[focusArea.type as PillarType];
   const TrendIcon = trendUp ? TrendUp : TrendDown;
@@ -144,13 +148,15 @@ export function HomeStatsGrid({ areas, weeklyDelta = 12 }: HomeStatsGridProps) {
           detail={`de ${areas.length} áreas acompanhadas`}
           visual={<AreaDots total={areas.length} filled={balancedCount} />}
         />
-        <StatBlock
-          headlineIcon={TrendIcon}
-          label="Tendência semanal"
-          headline={weeklyTrendLabel(weeklyDelta)}
-          headlineIconColor={trendUp ? themeColors.primarySoft : themeColors.warning}
-          detail={weeklyTrendDetail(weeklyDelta)}
-        />
+        {showWeeklyTrend ? (
+          <StatBlock
+            headlineIcon={TrendIcon}
+            label="Tendência semanal"
+            headline={weeklyTrendLabel(weeklyDelta)}
+            headlineIconColor={trendUp ? themeColors.primarySoft : themeColors.warning}
+            detail={weeklyTrendDetail(weeklyDelta)}
+          />
+        ) : null}
         <StatBlock
           headlineIcon={FocusIcon}
           label="Foco de hoje"

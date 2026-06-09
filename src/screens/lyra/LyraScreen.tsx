@@ -1,19 +1,24 @@
-import React, { useCallback, useState } from 'react';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { FlagBannerFold } from 'phosphor-react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { KeyboardAvoidingView, Platform, View } from 'react-native';
+import { useFocusEffect, useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { Text, YStack } from 'tamagui';
-import { ConfirmationModal } from '../../components/orbit';
 import { LyraChatInput } from '../../components/lyra/LyraChatInput';
 import { LyraFirstSessionBanner } from '../../components/lyra/LyraFirstSessionBanner';
 import { LyraMode, LyraModeTabs } from '../../components/lyra/LyraModeTabs';
 import { LyraOrb } from '../../components/lyra/LyraOrb';
 import { LyraTextChat } from '../../components/lyra/LyraTextChat';
+import { OrbitaCard } from '../../components/ui/OrbitaCard';
+import { PrimaryButton } from '../../components/ui/PrimaryButton';
 import { ScreenWrapper } from '../../components/ui/ScreenWrapper';
-import { CHECK_IN_AREA_IDS, getCheckInAreasCovered } from '../../services/checkIn';
+import { themeColors } from '../../constants/theme';
 import { useJourney } from '../../hooks/useJourney';
 import { useLyraAssistant } from '../../hooks/useLyraAssistant';
 import { useLyraTextChat } from '../../hooks/useLyraTextChat';
 import { MainTabParamList } from '../../navigation/types';
+import { LyraChatResponse } from '../../types';
+import { CheckInScreen } from './CheckInScreen';
 
 function VoiceStatusHint({ state }: { state: string }) {
   if (state === 'recording' || state === 'responding') return null;
@@ -35,21 +40,8 @@ function VoiceStatusHint({ state }: { state: string }) {
   );
 }
 
-function VoiceHint({
-  state,
-  busy,
-  needsCheckIn,
-  checkInOpened,
-}: {
-  state: string;
-  busy: boolean;
-  needsCheckIn: boolean;
-  checkInOpened: boolean;
-}) {
+function VoiceHint({ state, busy }: { state: string; busy: boolean }) {
   if (busy || state === 'recording' || state === 'responding') return null;
-
-  const hint =
-    needsCheckIn && !checkInOpened ? 'TOQUE PARA INICIAR' : 'TOQUE PARA FALAR';
 
   return (
     <Text
@@ -59,17 +51,17 @@ function VoiceHint({
       style={{ textAlign: 'center', letterSpacing: 1.4 }}
       mt="$4"
     >
-      {hint}
+      TOQUE PARA FALAR
     </Text>
   );
 }
 
 export function LyraScreen() {
   const navigation = useNavigation<BottomTabNavigationProp<MainTabParamList>>();
+  const route = useRoute<RouteProp<MainTabParamList, 'Lyra'>>();
   const [mode, setMode] = useState<LyraMode>('voice');
   const [textInput, setTextInput] = useState('');
-  const [showCheckInDone, setShowCheckInDone] = useState(false);
-  const [areasDone, setAreasDone] = useState(0);
+  const [showCheckInModal, setShowCheckInModal] = useState(false);
   const [pendingImage, setPendingImage] = useState<{
     uri: string;
     base64: string;
@@ -86,114 +78,60 @@ export function LyraScreen() {
 
   const needsCheckIn = loaded && !todayCheckInComplete;
   const showFirstSessionGuide = loaded && firstLyraPending && !firstLyraCompleted;
-
-  const refreshAreasProgress = useCallback(async () => {
-    const areas = await getCheckInAreasCovered();
-    setAreasDone(areas.length);
-  }, []);
-
-  const handleCheckInComplete = useCallback(() => {
-    setShowCheckInDone(true);
-    void refresh();
-    void refreshAreasProgress();
-  }, [refresh, refreshAreasProgress]);
-
   const isVoiceMode = mode === 'voice';
 
   const {
     state,
     error,
     toggleRecording,
+    deliverReply,
     cancelSession,
-    initiateCheckIn: initiateVoiceCheckIn,
   } = useLyraAssistant({
-      checkInMode: needsCheckIn,
-      syncLyraState: isVoiceMode,
-      onCheckInComplete: handleCheckInComplete,
-    });
+    checkInMode: false,
+    continuousVoice: true,
+    syncLyraState: isVoiceMode,
+  });
+
   const {
     messages,
     isLoading: isTextLoading,
     error: textError,
     sendMessage: sendTextMessage,
-    initiateCheckIn: initiateTextCheckIn,
+    appendLyraMessage,
     pickImage,
   } = useLyraTextChat({
-    checkInMode: needsCheckIn,
+    checkInMode: false,
     syncLyraState: !isVoiceMode,
-    onCheckInComplete: handleCheckInComplete,
   });
 
-  const [checkInOpened, setCheckInOpened] = useState(false);
-  const textCheckInStartedRef = React.useRef(false);
+  const cancelSessionRef = useRef(cancelSession);
+  cancelSessionRef.current = cancelSession;
 
   useFocusEffect(
     useCallback(() => {
       void refresh();
-      void refreshAreasProgress();
-
       return () => {
-        cancelSession();
+        cancelSessionRef.current();
       };
-    }, [refresh, refreshAreasProgress, cancelSession]),
+    }, [refresh]),
   );
 
+  useEffect(() => {
+    if (route.params?.openCheckIn && needsCheckIn) {
+      setShowCheckInModal(true);
+      navigation.setParams({ openCheckIn: undefined });
+    }
+  }, [route.params?.openCheckIn, needsCheckIn, navigation]);
+
   const isLyraBusy = state === 'processing' || state === 'responding';
-  const canTapVoice = mode === 'voice' && !isLyraBusy;
+  const canTapVoice = mode === 'voice' && !isLyraBusy && !needsCheckIn;
   const isTextBusy = mode === 'text' && isTextLoading;
+
   const statusTitle = needsCheckIn
     ? showFirstSessionGuide
       ? 'Vamos começar?'
       : 'Hora do check-in'
     : 'Como posso ajudar?';
-
-  React.useEffect(() => {
-    if (!needsCheckIn) {
-      setCheckInOpened(false);
-      textCheckInStartedRef.current = false;
-    }
-  }, [needsCheckIn]);
-
-  React.useEffect(() => {
-    if (
-      mode !== 'text' ||
-      !needsCheckIn ||
-      textCheckInStartedRef.current ||
-      isTextLoading ||
-      messages.length > 0
-    ) {
-      return;
-    }
-
-    textCheckInStartedRef.current = true;
-    void initiateTextCheckIn().then((ok) => {
-      if (ok) void refreshAreasProgress();
-    });
-  }, [
-    mode,
-    needsCheckIn,
-    isTextLoading,
-    messages.length,
-    initiateTextCheckIn,
-    refreshAreasProgress,
-  ]);
-
-  React.useEffect(() => {
-    if (areasDone > 0) {
-      setCheckInOpened(true);
-    }
-  }, [areasDone]);
-
-  const handleVoiceOrbPress = () => {
-    if (needsCheckIn && !checkInOpened && state === 'idle') {
-      setCheckInOpened(true);
-      void initiateVoiceCheckIn().then((ok) => {
-        if (ok) void refreshAreasProgress();
-      });
-      return;
-    }
-    void toggleRecording();
-  };
 
   const handleModeChange = (next: LyraMode) => {
     if (next === mode) return;
@@ -206,29 +144,35 @@ export function LyraScreen() {
   const canSendText = !!textInput.trim() || !!pendingImage;
 
   const handleSendText = async () => {
-    if (!canSendText || isTextBusy) return;
+    if (!canSendText || isTextBusy || needsCheckIn) return;
     const text = textInput;
     const image = pendingImage ?? undefined;
     setTextInput('');
     setPendingImage(null);
     await sendTextMessage(text, image);
-    await refreshAreasProgress();
   };
 
   const handlePickImage = async () => {
-    if (isTextBusy) return;
+    if (isTextBusy || needsCheckIn) return;
     const image = await pickImage();
     if (image) setPendingImage(image);
   };
 
-  const goToMission = () => {
-    setShowCheckInDone(false);
-    void refresh();
-    navigation.navigate('Mission');
-  };
+  const handleCheckInComplete = useCallback(
+    async (response: LyraChatResponse) => {
+      setMode('voice');
+      appendLyraMessage(response.reply);
+      await refresh();
+      setShowCheckInModal(false);
+      await deliverReply(response.reply, response.audioBase64);
+    },
+    [refresh, deliverReply, appendLyraMessage],
+  );
+
+  const isTextChat = mode === 'text' && !needsCheckIn;
 
   return (
-    <ScreenWrapper scrollable={false} tabBarOffset>
+    <ScreenWrapper scrollable={false} tabBarOffset compactBottom={isTextChat}>
       <YStack flex={1} pt="$4" px="$2">
         {showFirstSessionGuide ? (
           <YStack mb="$4">
@@ -238,82 +182,101 @@ export function LyraScreen() {
 
         <YStack items="center" gap="$2" mb="$6">
           <Text fontSize={14} color="$textMuted">
-            Check-in com sua coach
+            {needsCheckIn ? 'Check-in do dia' : 'Conversa com a Lyra'}
           </Text>
           <Text fontSize={22} fontWeight="800" color="$text" style={{ textAlign: 'center' }}>
             {statusTitle}
           </Text>
-          {needsCheckIn && areasDone > 0 ? (
-            <Text fontSize={13} color="$text">
-              {areasDone} de {CHECK_IN_AREA_IDS.length} áreas registradas
-            </Text>
-          ) : null}
         </YStack>
 
-        <LyraModeTabs mode={mode} onModeChange={handleModeChange} />
-
-        {mode === 'voice' ? (
-          <>
-            {error ? (
-              <Text fontSize={13} color="$danger" style={{ textAlign: 'center' }} mt="$3">
-                {error}
-              </Text>
-            ) : null}
-
-            <YStack flex={1} justify="center" items="center" gap="$1" mt="$4">
-              <LyraOrb
-                state={state}
-                pressable={canTapVoice}
-                onPress={canTapVoice ? handleVoiceOrbPress : undefined}
-              />
-              <VoiceStatusHint state={state} />
-              <VoiceHint
-                state={state}
-                busy={isLyraBusy}
-                needsCheckIn={needsCheckIn}
-                checkInOpened={checkInOpened}
-              />
-            </YStack>
-          </>
+        {needsCheckIn ? (
+          <YStack flex={1} gap="$4" justify="center" items="center">
+            <OrbitaCard>
+              <YStack gap="$4" p="$1" items="center">
+                <View
+                  style={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: 28,
+                    backgroundColor: themeColors.surfaceMuted,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <FlagBannerFold size={28} color={themeColors.primary} weight="regular" />
+                </View>
+                <Text fontSize={16} fontWeight="700" color="$text" text="center">
+                  Check-in diário
+                </Text>
+                <Text fontSize={14} color="$textMuted" lineHeight={20} text="center">
+                  Entenda como está sua órbita hoje e receba ações personalizadas para evoluir no
+                  que mais importa.
+                </Text>
+                <YStack width="100%" mt="$1">
+                  <PrimaryButton
+                    label="Iniciar check-in"
+                    onPress={() => setShowCheckInModal(true)}
+                  />
+                </YStack>
+              </YStack>
+            </OrbitaCard>
+          </YStack>
         ) : (
           <>
-            {textError ? (
-              <Text fontSize={13} color="$danger" style={{ textAlign: 'center' }} mt="$3">
-                {textError}
-              </Text>
-            ) : null}
+            <LyraModeTabs mode={mode} onModeChange={handleModeChange} />
 
-            <LyraTextChat
-              messages={messages}
-              isLoading={isTextLoading}
-              needsCheckIn={needsCheckIn}
-            />
+            {mode === 'voice' ? (
+              <>
+                {error ? (
+                  <Text fontSize={13} color="$danger" style={{ textAlign: 'center' }} mt="$3">
+                    {error}
+                  </Text>
+                ) : null}
 
-            <LyraChatInput
-              value={textInput}
-              onChangeText={setTextInput}
-              onSend={handleSendText}
-              onPickImage={handlePickImage}
-              pendingImageUri={pendingImage?.uri}
-              onClearImage={() => setPendingImage(null)}
-              disabled={isTextBusy}
-              canSend={canSendText}
-            />
+                <YStack flex={1} justify="center" items="center" gap="$1" mt="$4">
+                  <LyraOrb
+                    state={state}
+                    pressable={canTapVoice}
+                    onPress={canTapVoice ? () => void toggleRecording() : undefined}
+                  />
+                  <VoiceStatusHint state={state} />
+                  <VoiceHint state={state} busy={isLyraBusy} />
+                </YStack>
+              </>
+            ) : (
+              <KeyboardAvoidingView
+                style={{ flex: 1 }}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                keyboardVerticalOffset={0}
+              >
+                {textError ? (
+                  <Text fontSize={13} color="$danger" style={{ textAlign: 'center' }} mt="$3">
+                    {textError}
+                  </Text>
+                ) : null}
+
+                <LyraTextChat messages={messages} isLoading={isTextLoading} needsCheckIn={false} />
+
+                <LyraChatInput
+                  value={textInput}
+                  onChangeText={setTextInput}
+                  onSend={() => void handleSendText()}
+                  onPickImage={() => void handlePickImage()}
+                  pendingImageUri={pendingImage?.uri}
+                  onClearImage={() => setPendingImage(null)}
+                  disabled={isTextBusy}
+                  canSend={canSendText}
+                />
+              </KeyboardAvoidingView>
+            )}
           </>
         )}
       </YStack>
 
-      <ConfirmationModal
-        visible={showCheckInDone}
-        title="Check-in feito"
-        message="Sua órbita começou a tomar forma. Veja sua Missão para o resumo do dia ou explore a Orbita quando quiser."
-        confirmLabel="Ver minha Missão"
-        cancelLabel="Ficar na Lyra"
-        onConfirm={goToMission}
-        onCancel={() => {
-          setShowCheckInDone(false);
-          void refresh();
-        }}
+      <CheckInScreen
+        visible={showCheckInModal}
+        onClose={() => setShowCheckInModal(false)}
+        onComplete={(response) => void handleCheckInComplete(response)}
       />
     </ScreenWrapper>
   );

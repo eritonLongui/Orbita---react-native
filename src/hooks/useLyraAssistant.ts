@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState, useEffect } from 'react';
 import { Platform } from 'react-native';
-import { CHECK_IN_OPENING_FALLBACK, getCheckInAreasCovered } from '../services/checkIn';
 import { sendToLyra } from '../services/conversation';
+import { getCheckInAreasCovered } from '../services/checkIn';
 import {
   cancelRecording,
   getMicrophonePermissionStatus,
@@ -17,24 +17,34 @@ import {
 import { getLyraVoiceConfigFromProfile } from '../constants/lyraVoice';
 import { useAuth } from '../providers/AuthProvider';
 import { useLyraState } from '../providers/LyraStateProvider';
+import { fetchCheckInOpening, processStructuredCheckInTurn } from '../utils/checkInFlow';
 import { processCheckInResponse } from '../utils/checkInResponse';
+import { LyraChatResponse } from '../types';
 
 export type LyraSessionState = 'idle' | 'recording' | 'processing' | 'responding';
 
-async function playLyraReply(reply: string, audioBase64?: string, speechRate = 0.95) {
+async function playLyraReply(
+  reply: string,
+  audioBase64?: string,
+  speechRate = 0.95,
+  allowSystemFallback = true,
+) {
   if (audioBase64) {
     try {
       await playAudioBase64(audioBase64);
       return;
     } catch (e) {
-      console.warn('playAudioBase64 failed, fallback to speech:', e);
+      console.warn('playAudioBase64 failed:', e);
     }
   }
-  await speakText(reply, speechRate);
+  if (allowSystemFallback) {
+    await speakText(reply, speechRate);
+  }
 }
 
 interface UseLyraAssistantOptions {
   checkInMode?: boolean;
+  continuousVoice?: boolean;
   syncLyraState?: boolean;
   onCheckInComplete?: (isFirstCompletion: boolean) => void;
 }
@@ -50,7 +60,9 @@ export function useLyraAssistant(options?: UseLyraAssistantOptions) {
   const sessionGenerationRef = useRef(0);
 
   const checkInMode = options?.checkInMode ?? false;
+  const continuousVoice = options?.continuousVoice ?? !checkInMode;
   const syncLyraState = options?.syncLyraState ?? true;
+  const autoMicRef = useRef(true);
 
   useEffect(() => {
     stateRef.current = state;
@@ -64,6 +76,7 @@ export function useLyraAssistant(options?: UseLyraAssistantOptions) {
   const voiceEnabled = true;
   const voiceConfig = getLyraVoiceConfigFromProfile(profile);
   const stopVoiceSessionRef = useRef<() => Promise<void>>(async () => {});
+  const startVoiceSessionRef = useRef<() => Promise<void>>(async () => {});
 
   const isSessionCurrent = useCallback(
     (generation: number) => sessionGenerationRef.current === generation,
@@ -71,9 +84,10 @@ export function useLyraAssistant(options?: UseLyraAssistantOptions) {
   );
 
   const handleLyraResponse = useCallback(
-    async (response: Awaited<ReturnType<typeof sendToLyra>>) => {
+    async (response: LyraChatResponse) => {
       const generation = sessionGenerationRef.current;
       setState('responding');
+      let autoMicStarted = false;
 
       try {
         if (voiceEnabled && isSessionCurrent(generation)) {
@@ -81,13 +95,27 @@ export function useLyraAssistant(options?: UseLyraAssistantOptions) {
         }
         if (!isSessionCurrent(generation)) return;
         await processCheckInResponse(response, checkInMode, options?.onCheckInComplete);
+
+        if (
+          (checkInMode || continuousVoice) &&
+          !response.checkInComplete &&
+          autoMicRef.current &&
+          isSessionCurrent(generation)
+        ) {
+          await new Promise((r) => setTimeout(r, 300));
+          if (isSessionCurrent(generation) && autoMicRef.current) {
+            autoMicStarted = true;
+            await startVoiceSessionRef.current();
+          }
+          return;
+        }
       } finally {
-        if (isSessionCurrent(generation)) {
+        if (!autoMicStarted && isSessionCurrent(generation)) {
           setState('idle');
         }
       }
     },
-    [voiceEnabled, voiceConfig.speechRate, checkInMode, options, isSessionCurrent],
+    [voiceEnabled, voiceConfig.speechRate, checkInMode, continuousVoice, options, isSessionCurrent],
   );
 
   const stopVoiceSession = useCallback(async () => {
@@ -108,17 +136,27 @@ export function useLyraAssistant(options?: UseLyraAssistantOptions) {
         return;
       }
 
-      const areasCovered = checkInMode ? await getCheckInAreasCovered() : undefined;
-      const response = await sendToLyra({
-        audioBase64: audio.base64,
-        audioMimeType: audio.mimeType,
-        audioExt: audio.ext,
-        voiceEnabled: true,
-        voiceStyle: voiceConfig.style,
-        voiceAccent: voiceConfig.accent,
-        checkInMode,
-        areasCovered,
-      });
+      let response: LyraChatResponse;
+
+      if (checkInMode) {
+        response = await processStructuredCheckInTurn({
+          audioBase64: audio.base64,
+          audioMimeType: audio.mimeType,
+          audioExt: audio.ext,
+          voiceEnabled: true,
+          voiceStyle: voiceConfig.style,
+          voiceAccent: voiceConfig.accent,
+        });
+      } else {
+        response = await sendToLyra({
+          audioBase64: audio.base64,
+          audioMimeType: audio.mimeType,
+          audioExt: audio.ext,
+          voiceEnabled: true,
+          voiceStyle: voiceConfig.style,
+          voiceAccent: voiceConfig.accent,
+        });
+      }
 
       if (!isSessionCurrent(generation)) return;
       await handleLyraResponse(response);
@@ -138,12 +176,20 @@ export function useLyraAssistant(options?: UseLyraAssistantOptions) {
     await stopVoiceSessionRef.current();
   }, []);
 
+  const handleInactivityTimeout = useCallback(() => {
+    autoMicRef.current = false;
+    setState('idle');
+  }, []);
+
   const startVoiceSession = useCallback(async () => {
     const generation = sessionGenerationRef.current;
     setError(null);
+    setState('recording');
 
     if (Platform.OS !== 'web') {
       const granted = await requestMicrophonePermission();
+      if (!isSessionCurrent(generation)) return;
+
       if (!granted) {
         setError('Permissão de microfone necessária para conversar com a Lyra.');
         setState('idle');
@@ -152,20 +198,26 @@ export function useLyraAssistant(options?: UseLyraAssistantOptions) {
     }
 
     try {
-      await startRecording({ onSilenceAutoStop: handleSilenceDetected });
+      await startRecording({
+        onSilenceAutoStop: handleSilenceDetected,
+        onInactivityTimeout: handleInactivityTimeout,
+        inactivityTimeoutMs: 120_000,
+      });
       if (!isSessionCurrent(generation)) {
         cancelRecording();
         return;
       }
       setState('recording');
     } catch (e) {
+      if (!isSessionCurrent(generation)) return;
       console.warn('startRecording failed:', e);
       setError('Não foi possível iniciar a gravação. Use o dev build nativo (não Expo Go).');
       setState('idle');
     }
-  }, [handleSilenceDetected, isSessionCurrent]);
+  }, [handleSilenceDetected, handleInactivityTimeout, isSessionCurrent]);
 
   stopVoiceSessionRef.current = stopVoiceSession;
+  startVoiceSessionRef.current = startVoiceSession;
 
   const initiateCheckIn = useCallback(async (): Promise<boolean> => {
     if (!checkInMode || initiatingRef.current || stateRef.current !== 'idle') {
@@ -173,37 +225,27 @@ export function useLyraAssistant(options?: UseLyraAssistantOptions) {
     }
 
     initiatingRef.current = true;
+    autoMicRef.current = true;
     const generation = sessionGenerationRef.current;
     setState('processing');
     setError(null);
 
     try {
-      const areasCovered = await getCheckInAreasCovered();
-      const response = await sendToLyra({
-        text: 'Iniciar check-in',
-        checkInMode: true,
-        initiateCheckIn: true,
-        areasCovered,
-        voiceEnabled: true,
-        voiceStyle: voiceConfig.style,
-        voiceAccent: voiceConfig.accent,
-      });
+      const response = await fetchCheckInOpening(
+        true,
+        voiceConfig.style,
+        voiceConfig.accent,
+      );
 
       if (!isSessionCurrent(generation)) return false;
       await handleLyraResponse(response);
       return true;
     } catch (e) {
       if (!isSessionCurrent(generation)) return false;
-      console.warn('initiateCheckIn failed, using local opening:', e);
-      try {
-        await handleLyraResponse(CHECK_IN_OPENING_FALLBACK);
-        return true;
-      } catch (fallbackError) {
-        console.warn('check-in fallback failed:', fallbackError);
-        setError(e instanceof Error ? e.message : 'Erro ao iniciar check-in.');
-        setState('idle');
-        return false;
-      }
+      console.warn('initiateCheckIn failed:', e);
+      setError(e instanceof Error ? e.message : 'Erro ao iniciar check-in.');
+      setState('idle');
+      return false;
     } finally {
       initiatingRef.current = false;
     }
@@ -245,19 +287,61 @@ export function useLyraAssistant(options?: UseLyraAssistantOptions) {
   );
 
   const toggleRecording = useCallback(async () => {
-    if (state === 'recording') {
+    const current = stateRef.current;
+
+    if (current === 'recording') {
       await playReceivedFeedback();
       await stopVoiceSession();
       return;
     }
 
-    if (state === 'idle') {
+    if (current === 'idle') {
+      autoMicRef.current = true;
       await startVoiceSession();
     }
-  }, [state, startVoiceSession, stopVoiceSession]);
+  }, [startVoiceSession, stopVoiceSession]);
+
+  const deliverReply = useCallback(
+    async (reply: string, audioBase64?: string) => {
+      const generation = sessionGenerationRef.current;
+      autoMicRef.current = false;
+      setError(null);
+      setState('responding');
+
+      try {
+        if (!voiceEnabled || !isSessionCurrent(generation)) return;
+
+        let audio = audioBase64;
+        if (!audio) {
+          try {
+            const ttsRes = await sendToLyra({
+              text: reply,
+              structuredCheckIn: 'tts',
+              voiceEnabled: true,
+              voiceStyle: voiceConfig.style,
+              voiceAccent: voiceConfig.accent,
+            });
+            audio = ttsRes.audioBase64;
+          } catch (e) {
+            console.warn('deliverReply TTS request failed:', e);
+          }
+        }
+
+        if (isSessionCurrent(generation)) {
+          await playLyraReply(reply, audio, voiceConfig.speechRate, false);
+        }
+      } finally {
+        if (isSessionCurrent(generation)) {
+          setState('idle');
+        }
+      }
+    },
+    [voiceEnabled, voiceConfig, isSessionCurrent],
+  );
 
   const cancelSession = useCallback(() => {
     sessionGenerationRef.current += 1;
+    autoMicRef.current = false;
     cancelRecording();
     void stopPlayback();
     stopSpeaking();
@@ -275,6 +359,7 @@ export function useLyraAssistant(options?: UseLyraAssistantOptions) {
     voiceEnabled,
     toggleRecording,
     sendTextMessage,
+    deliverReply,
     initiateCheckIn,
     cancelSession,
     checkMicPermission,

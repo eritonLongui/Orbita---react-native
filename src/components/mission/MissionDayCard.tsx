@@ -16,7 +16,7 @@ function getStreakCopy(streak: number): string {
 }
 
 export function MissionDayCard({ missionDay, streak }: MissionDayCardProps) {
-  const streakLabel = streak === 1 ? '1 dia seguido' : `${streak} dias seguidos`;
+  const sequenceSuffix = streak === 1 ? 'dia seguido' : 'dias seguidos';
 
   return (
     <OrbitaCard>
@@ -47,12 +47,17 @@ export function MissionDayCard({ missionDay, streak }: MissionDayCardProps) {
           <XStack items="center" gap="$2">
             <Star size={18} color={themeColors.warning} weight="fill" />
             <Text fontSize={12} fontWeight="700" letterSpacing={0.8} color="$textMuted">
-              STREAK
+              SEQUÊNCIA
             </Text>
           </XStack>
-          <Text fontSize={20} fontWeight="800" color="$text" lineHeight={26}>
-            {streakLabel}
-          </Text>
+          <XStack items="baseline" gap="$1.5" flexWrap="nowrap">
+            <Text fontSize={22} fontWeight="800" color="$text" lineHeight={26} flexShrink={0}>
+              {streak}
+            </Text>
+            <Text fontSize={13} fontWeight="600" color="$text" lineHeight={18} flexShrink={1}>
+              {sequenceSuffix}
+            </Text>
+          </XStack>
           <Text fontSize={13} color="$textSupport" lineHeight={18}>
             {getStreakCopy(streak)}
           </Text>

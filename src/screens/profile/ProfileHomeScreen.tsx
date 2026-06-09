@@ -16,6 +16,7 @@ import { useJourney } from '../../hooks/useJourney';
 import { useAuth } from '../../providers/AuthProvider';
 import { useMockData } from '../../providers/MockDataProvider';
 import { resetTodayCheckIn } from '../../services/checkIn';
+import { requestLyraTextChatClear } from '../../services/lyraTextChatSession';
 import { getProfileInitial, getProfilePhotoUrl } from '../../utils/profilePhoto';
 
 export function ProfileHomeScreen() {
@@ -126,6 +127,43 @@ export function ProfileHomeScreen() {
                 }}
               />
             </XStack>
+          </OrbitaCard>
+          <OrbitaCard>
+            <YStack gap="$2">
+              <Text fontSize={15} fontWeight="600" color="$text">
+                Abrir onboarding
+              </Text>
+              <Text fontSize={13} color="$textMuted" lineHeight={18}>
+                Percorre o fluxo de boas-vindas (pilares, perfil e permissões) sem alterar sua
+                conta.
+              </Text>
+              <Text
+                fontSize={14}
+                fontWeight="600"
+                color="$primary"
+                onPress={() => navigation.navigate('OnboardingTest')}
+              >
+                Iniciar preview
+              </Text>
+            </YStack>
+          </OrbitaCard>
+          <OrbitaCard>
+            <YStack gap="$2">
+              <Text fontSize={15} fontWeight="600" color="$text">
+                Limpar chat de texto
+              </Text>
+              <Text fontSize={13} color="$textMuted" lineHeight={18}>
+                Apaga as mensagens do modo texto na Lyra (útil para testar do zero).
+              </Text>
+              <Text
+                fontSize={14}
+                fontWeight="600"
+                color="$primary"
+                onPress={() => requestLyraTextChatClear()}
+              >
+                Limpar conversa
+              </Text>
+            </YStack>
           </OrbitaCard>
           <OrbitaCard>
             <YStack gap="$2">

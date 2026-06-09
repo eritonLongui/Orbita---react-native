@@ -3,8 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
 import { OnboardingPillarsScreen } from '../screens/auth/OnboardingPillarsScreen';
 import { OnboardingProfileScreen } from '../screens/auth/OnboardingProfileScreen';
-import { PermissionMicrophoneScreen } from '../screens/auth/PermissionMicrophoneScreen';
-import { PermissionNotificationsScreen } from '../screens/auth/PermissionNotificationsScreen';
+import { PermissionsOnboardingScreen } from '../screens/auth/PermissionsOnboardingScreen';
 import { WelcomeAuthScreen } from '../screens/auth/WelcomeAuthScreen';
 import { markFirstLyraPending } from '../services/journey';
 import { AuthStackParamList } from './types';
@@ -54,21 +53,14 @@ export function AuthNavigator({ initialRoute, onOnboardingComplete }: AuthNaviga
               if (permissionsDone) {
                 void markFirstLyraPending().then(onOnboardingComplete);
               } else {
-                navigation.navigate('PermissionMicrophone');
+                navigation.navigate('Permissions');
               }
             }}
           />
         )}
       </Stack.Screen>
-      <Stack.Screen name="PermissionMicrophone">
-        {({ navigation }) => (
-          <PermissionMicrophoneScreen
-            onContinue={() => navigation.navigate('PermissionNotifications')}
-          />
-        )}
-      </Stack.Screen>
-      <Stack.Screen name="PermissionNotifications">
-        {() => <PermissionNotificationsScreen onComplete={finishPermissions} />}
+      <Stack.Screen name="Permissions">
+        {() => <PermissionsOnboardingScreen onComplete={finishPermissions} />}
       </Stack.Screen>
     </Stack.Navigator>
   );

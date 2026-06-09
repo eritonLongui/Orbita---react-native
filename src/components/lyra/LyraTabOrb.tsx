@@ -1,19 +1,105 @@
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MotiView } from 'moti';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import { themeColors } from '../../constants/theme';
 
-const SIZE = 44;
-const HALO_SIZE = 58;
-const EYE_W = 4;
-const EYE_H = 11;
-const EYE_GAP = 6;
+type LyraTabOrbSize = 'tab' | 'sm';
 
-export const LYRA_TAB_ORB_SIZE = HALO_SIZE;
+const SIZE_PRESETS: Record<
+  LyraTabOrbSize,
+  { halo: number; orb: number; eyeW: number; eyeH: number; eyeGap: number }
+> = {
+  tab: { halo: 58, orb: 44, eyeW: 4, eyeH: 11, eyeGap: 6 },
+  sm: { halo: 32, orb: 24, eyeW: 2.5, eyeH: 7, eyeGap: 3 },
+};
 
-export function LyraTabOrb() {
+export const LYRA_TAB_ORB_SIZE = SIZE_PRESETS.tab.halo;
+
+interface LyraTabOrbProps {
+  size?: LyraTabOrbSize;
+}
+
+export function LyraTabOrb({ size = 'tab' }: LyraTabOrbProps) {
+  const metrics = SIZE_PRESETS[size];
+
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        container: {
+          width: metrics.halo,
+          height: metrics.halo,
+          alignItems: 'center',
+          justifyContent: 'center',
+          overflow: 'visible',
+        },
+        haloOuter: {
+          position: 'absolute',
+          width: metrics.halo,
+          height: metrics.halo,
+          borderRadius: metrics.halo / 2,
+          overflow: 'hidden',
+        },
+        haloTint: {
+          ...StyleSheet.absoluteFill,
+          backgroundColor: 'rgba(75, 139, 255, 0.22)',
+          borderRadius: metrics.halo / 2,
+        },
+        haloInner: {
+          position: 'absolute',
+          width: metrics.orb + 10,
+          height: metrics.orb + 10,
+          borderRadius: (metrics.orb + 10) / 2,
+          backgroundColor: themeColors.primary,
+          shadowColor: themeColors.primaryGlow,
+          shadowOffset: { width: 0, height: 0 },
+          shadowOpacity: 0.85,
+          shadowRadius: size === 'tab' ? 14 : 10,
+          elevation: size === 'tab' ? 8 : 6,
+        },
+        pulseRing: {
+          position: 'absolute',
+          width: metrics.orb + 6,
+          height: metrics.orb + 6,
+          borderRadius: (metrics.orb + 6) / 2,
+          borderWidth: 1.5,
+          borderColor: themeColors.primarySoft,
+        },
+        pulseRingDelayed: {
+          position: 'absolute',
+          width: metrics.orb + 6,
+          height: metrics.orb + 6,
+          borderRadius: (metrics.orb + 6) / 2,
+          borderWidth: 1,
+          borderColor: themeColors.primaryGlow,
+        },
+        orb: {
+          width: metrics.orb,
+          height: metrics.orb,
+          borderRadius: metrics.orb / 2,
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderWidth: 1,
+          borderColor: 'rgba(255, 255, 255, 0.22)',
+          overflow: 'hidden',
+          zIndex: 2,
+        },
+        eyesRow: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: metrics.eyeGap,
+        },
+        eye: {
+          width: metrics.eyeW,
+          height: metrics.eyeH,
+          borderRadius: 2,
+          backgroundColor: '#FFFFFF',
+        },
+      }),
+    [metrics, size],
+  );
+
   return (
     <View style={styles.container}>
       <MotiView
@@ -98,75 +184,3 @@ export function LyraTabOrb() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    width: HALO_SIZE,
-    height: HALO_SIZE,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'visible',
-  },
-  haloOuter: {
-    position: 'absolute',
-    width: HALO_SIZE,
-    height: HALO_SIZE,
-    borderRadius: HALO_SIZE / 2,
-    overflow: 'hidden',
-  },
-  haloTint: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: 'rgba(75, 139, 255, 0.22)',
-    borderRadius: HALO_SIZE / 2,
-  },
-  haloInner: {
-    position: 'absolute',
-    width: SIZE + 10,
-    height: SIZE + 10,
-    borderRadius: (SIZE + 10) / 2,
-    backgroundColor: themeColors.primary,
-    shadowColor: themeColors.primaryGlow,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.85,
-    shadowRadius: 14,
-    elevation: 8,
-  },
-  pulseRing: {
-    position: 'absolute',
-    width: SIZE + 6,
-    height: SIZE + 6,
-    borderRadius: (SIZE + 6) / 2,
-    borderWidth: 1.5,
-    borderColor: themeColors.primarySoft,
-  },
-  pulseRingDelayed: {
-    position: 'absolute',
-    width: SIZE + 6,
-    height: SIZE + 6,
-    borderRadius: (SIZE + 6) / 2,
-    borderWidth: 1,
-    borderColor: themeColors.primaryGlow,
-  },
-  orb: {
-    width: SIZE,
-    height: SIZE,
-    borderRadius: SIZE / 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.22)',
-    overflow: 'hidden',
-    zIndex: 2,
-  },
-  eyesRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: EYE_GAP,
-  },
-  eye: {
-    width: EYE_W,
-    height: EYE_H,
-    borderRadius: 2,
-    backgroundColor: '#FFFFFF',
-  },
-});

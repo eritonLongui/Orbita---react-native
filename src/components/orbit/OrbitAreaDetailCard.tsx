@@ -135,42 +135,25 @@ export function OrbitAreaDetailCard({ detail }: OrbitAreaDetailCardProps) {
                 </InnerSection>
 
                 <InnerSection>
-                  <YStack gap="$3">
-                    <Text
-                      fontSize={12}
-                      fontWeight="700"
-                      letterSpacing={1.2}
-                      style={{ color: themeColors.textMuted }}
-                    >
-                      RESUMO
-                    </Text>
-                    <Text fontSize={14} color="$text" lineHeight={21}>
-                      {detail.summary}
-                    </Text>
-                  </YStack>
-                </InnerSection>
-
-                <InnerSection>
                   <OrbitAreaHistoryChart history={detail.history} status={detail.status} />
                 </InnerSection>
 
                 <InnerSection>
-                  <XStack gap="$3" items="flex-start">
-                    <Lightbulb size={22} color={themeColors.primarySoft} />
-                    <YStack flex={1} gap="$3">
-                      <Text
-                        fontSize={12}
-                        fontWeight="700"
-                        letterSpacing={1.2}
-                        style={{ color: themeColors.textMuted }}
-                      >
-                        RECOMENDAÇÃO DA LYRA
-                      </Text>
-                      <Text fontSize={14} color="$text" lineHeight={21}>
-                        {detail.recommendation}
-                      </Text>
-                    </YStack>
-                  </XStack>
+                  <YStack gap="$3" items="center">
+                    <Lightbulb size={28} color={themeColors.primarySoft} />
+                    <Text
+                      fontSize={12}
+                      fontWeight="700"
+                      letterSpacing={1.2}
+                      text="center"
+                      style={{ color: themeColors.textMuted }}
+                    >
+                      RECOMENDAÇÃO DA LYRA
+                    </Text>
+                    <Text fontSize={14} color="$text" lineHeight={21} text="center">
+                      {detail.recommendation}
+                    </Text>
+                  </YStack>
                 </InnerSection>
               </YStack>
             </Animated.View>

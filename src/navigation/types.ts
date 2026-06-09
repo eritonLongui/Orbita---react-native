@@ -2,8 +2,7 @@ export type AuthStackParamList = {
   Welcome: undefined;
   OnboardingPillars: undefined;
   OnboardingProfile: undefined;
-  PermissionMicrophone: undefined;
-  PermissionNotifications: undefined;
+  Permissions: undefined;
 };
 
 export type ProfileStackParamList = {
@@ -13,12 +12,13 @@ export type ProfileStackParamList = {
   LyraSettings: undefined;
   PermissionsSettings: undefined;
   SecurityPrivacy: undefined;
+  OnboardingTest: undefined;
 };
 
 export type MainTabParamList = {
   Mission: undefined;
   Orbit: undefined;
-  Lyra: undefined;
-  Evolution: undefined;
+  Lyra: { openCheckIn?: boolean } | undefined;
+  Achievements: undefined;
   Profile: undefined;
 };

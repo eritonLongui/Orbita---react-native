@@ -73,10 +73,12 @@ function mimeForUri(uri: string): { mimeType: string; ext: string } {
 
 export interface StartRecordingOptions {
   onSilenceAutoStop?: () => void;
+  onInactivityTimeout?: () => void;
+  inactivityTimeoutMs?: number;
 }
 
 export async function startRecording(options: StartRecordingOptions = {}): Promise<void> {
-  const { onSilenceAutoStop } = options;
+  const { onSilenceAutoStop, onInactivityTimeout, inactivityTimeoutMs } = options;
 
   clearSilenceMonitor();
   onSilenceStopCallback = onSilenceAutoStop ?? null;
@@ -146,7 +148,14 @@ export async function startRecording(options: StartRecordingOptions = {}): Promi
       speechStreakMs = 0;
     }
 
-    if (!heardSpeech) return;
+    if (!heardSpeech) {
+      if (inactivityTimeoutMs && elapsed >= inactivityTimeoutMs) {
+        clearSilenceMonitor();
+        cancelRecording();
+        onInactivityTimeout?.();
+      }
+      return;
+    }
 
     if (status.durationMillis < MIN_SPEECH_MS) return;
 
