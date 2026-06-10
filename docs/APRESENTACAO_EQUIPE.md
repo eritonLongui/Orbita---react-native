@@ -198,7 +198,7 @@ No radar: equilíbrio = forma estável; oscilação = deformação (espelho gent
 
 ### Opção A — APK (mais fácil, qualquer Android)
 
-1. Baixar APK preview: **https://github.com/eritonLongui/Orbita---react-native/releases/tag/preview-78f725c4**  
+1. Baixar APK preview: **https://github.com/eritonLongui/Orbita---react-native/releases/tag/preview-0da53e3f**  
    (alternativa: [builds EAS](https://expo.dev/accounts/marcomendessv/projects/Orbita/builds))  
 2. Instalar no celular Android  
 3. Login Google → **Continuar com Google**  

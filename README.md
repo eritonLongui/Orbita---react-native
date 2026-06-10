@@ -124,8 +124,8 @@ Escolha o caminho de acordo com seu objetivo:
 ## 📲 Caminho A — Só testar (APK)
 
 1. Baixe o APK preview mais recente:  
-   **https://github.com/eritonLongui/Orbita---react-native/releases/tag/preview-78f725c4**  
-   (alternativa: [build EAS `78f725c4`](https://expo.dev/accounts/marcomendessv/projects/Orbita/builds/78f725c4-ec8a-4214-89d6-50643ff8b8ac))
+   **https://github.com/eritonLongui/Orbita---react-native/releases/tag/preview-0da53e3f**  
+   (alternativa: [build EAS `0da53e3f`](https://expo.dev/accounts/marcomendessv/projects/Orbita/builds/0da53e3f-3179-459f-af52-b30d9724fbe7))
 2. Instale no celular Android.
 3. Toque em **Continuar com Google**.
 
