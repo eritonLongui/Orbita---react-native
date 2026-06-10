@@ -1,5 +1,6 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
+import { themeColors } from '../constants/theme';
 import { WelcomeAuthScreen } from '../screens/auth/WelcomeAuthScreen';
 import { OnboardingFlowScreen } from '../screens/onboarding/OnboardingFlowScreen';
 import { markFirstLyraPending } from '../services/journey';
@@ -20,7 +21,11 @@ export function AuthNavigator({ initialRoute, onOnboardingComplete }: AuthNaviga
   return (
     <Stack.Navigator
       initialRouteName={initialRoute}
-      screenOptions={{ headerShown: false, animation: 'slide_from_right' }}
+      screenOptions={{
+        headerShown: false,
+        animation: 'slide_from_right',
+        contentStyle: { flex: 1, backgroundColor: themeColors.bg },
+      }}
     >
       <Stack.Screen name="Welcome" component={WelcomeAuthScreen} />
       <Stack.Screen name="OnboardingFlow">

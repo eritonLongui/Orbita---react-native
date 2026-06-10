@@ -15,12 +15,13 @@ export function RootNavigator() {
 
   const authInitialRoute = useMemo<keyof AuthStackParamList>(() => {
     if (!user) return 'Welcome';
-    if (!profile?.onboarding_completed && !onboardingDone) return 'OnboardingFlow';
+    if (profile && !profile.onboarding_completed && !onboardingDone) return 'OnboardingFlow';
     return 'Welcome';
-  }, [user, profile?.onboarding_completed, onboardingDone]);
+  }, [user, profile, onboardingDone]);
 
   const isAuthenticated = !!user && (profile?.onboarding_completed || onboardingDone);
-  const isResolvingSession = initializing;
+  // Após login, o Firebase define `user` antes do perfil carregar — sem isso o onboarding pisca.
+  const isResolvingSession = initializing || (!!user && profile === null);
 
   if (showSplash) {
     return <SplashScreen onFinish={() => setShowSplash(false)} />;

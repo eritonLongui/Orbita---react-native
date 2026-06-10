@@ -16,6 +16,7 @@ import {
   ONBOARDING_HEADER_FADE_HEIGHT,
   OnboardingHeaderZone,
 } from '../../components/onboarding/OnboardingHeaderZone';
+import { themeColors } from '../../constants/theme';
 import { AppBackground } from '../../components/ui/AppBackground';
 import { OnboardingAreasScreen } from './OnboardingAreasScreen';
 import { OnboardingLoopScreen } from './OnboardingLoopScreen';
@@ -68,6 +69,7 @@ function OnboardingPage({
 }) {
   return (
     <View
+      collapsable={false}
       style={[
         styles.page,
         pageWidth != null ? { width: pageWidth } : undefined,
@@ -123,25 +125,23 @@ export function OnboardingFlowScreen({
     [scrollStride],
   );
 
-  const usePagerView = Boolean(PagerView && containerWidth > 0);
+  // Android: PagerView empilha páginas com flex — ScrollView + snap é estável.
+  const usePagerView = Boolean(PagerView && containerWidth > 0 && Platform.OS === 'ios');
   const useScrollGap = !usePagerView && containerWidth > 0;
+  const resolvedPageWidth = containerWidth > 0 ? pageWidth : undefined;
 
   const pages = (
     <>
-      <OnboardingPage pageWidth={useScrollGap ? pageWidth : undefined} useScrollGap={useScrollGap}>
+      <OnboardingPage pageWidth={resolvedPageWidth} useScrollGap={useScrollGap}>
         <OnboardingLoopScreen embedded onContinue={() => goToPage(1)} />
       </OnboardingPage>
-      <OnboardingPage pageWidth={useScrollGap ? pageWidth : undefined} useScrollGap={useScrollGap}>
+      <OnboardingPage pageWidth={resolvedPageWidth} useScrollGap={useScrollGap}>
         <OnboardingAreasScreen embedded onContinue={() => goToPage(2)} />
       </OnboardingPage>
-      <OnboardingPage pageWidth={useScrollGap ? pageWidth : undefined} useScrollGap={useScrollGap}>
+      <OnboardingPage pageWidth={resolvedPageWidth} useScrollGap={useScrollGap}>
         <OnboardingLyraScreen embedded onContinue={() => goToPage(3)} />
       </OnboardingPage>
-      <OnboardingPage
-        pageWidth={useScrollGap ? pageWidth : undefined}
-        useScrollGap={useScrollGap}
-        isLast
-      >
+      <OnboardingPage pageWidth={resolvedPageWidth} useScrollGap={useScrollGap} isLast>
         <OnboardingSetupScreen
           embedded
           onComplete={handleSetupComplete}
@@ -204,19 +204,24 @@ export function OnboardingFlowScreen({
 const styles = StyleSheet.create({
   pagerHost: {
     flex: 1,
-    overflow: 'visible',
+    overflow: 'hidden',
   },
   pager: {
     flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
+    height: '100%',
   },
   page: {
     flex: 1,
+    height: '100%',
+    overflow: 'hidden',
+    backgroundColor: themeColors.bg,
   },
   pageInner: {
     flex: 1,
+    overflow: 'hidden',
     paddingHorizontal: ONBOARDING_PAGE_INSET,
   },
 });

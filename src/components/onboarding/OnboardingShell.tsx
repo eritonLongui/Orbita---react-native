@@ -180,6 +180,11 @@ const styles = StyleSheet.create({
   centeredBody: {
     justifyContent: 'center',
   },
+  embeddedPage: {
+    flex: 1,
+    overflow: 'hidden',
+    backgroundColor: themeColors.bg,
+  },
 });
 
 export function OnboardingShell({
@@ -190,9 +195,9 @@ export function OnboardingShell({
 }: OnboardingShellProps) {
   if (embedded) {
     return (
-      <YStack flex={1}>
+      <View style={styles.embeddedPage}>
         <OnboardingShellContent {...contentProps} embedded />
-      </YStack>
+      </View>
     );
   }
 
