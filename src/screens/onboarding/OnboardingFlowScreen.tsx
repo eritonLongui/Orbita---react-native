@@ -96,17 +96,22 @@ export function OnboardingFlowScreen({
   const scrollRef = useRef<ScrollView>(null);
   const [page, setPage] = useState(0);
 
+  // Android: PagerView empilha páginas com flex — ScrollView + snap é estável.
+  const usePagerView = Boolean(PagerView && containerWidth > 0 && Platform.OS === 'ios');
+  const useScrollGap = !usePagerView && containerWidth > 0;
+  const resolvedPageWidth = containerWidth > 0 ? pageWidth : undefined;
+
   const goToPage = useCallback(
     (index: number) => {
       const next = Math.max(0, Math.min(PAGE_COUNT - 1, index));
-      if (PagerView) {
+      if (usePagerView) {
         pagerRef.current?.setPage(next);
       } else {
         scrollRef.current?.scrollTo({ x: next * scrollStride, animated: true });
       }
       setPage(next);
     },
-    [PagerView, scrollStride],
+    [usePagerView, scrollStride],
   );
 
   const handleSetupComplete = useCallback(() => {
@@ -124,11 +129,6 @@ export function OnboardingFlowScreen({
     },
     [scrollStride],
   );
-
-  // Android: PagerView empilha páginas com flex — ScrollView + snap é estável.
-  const usePagerView = Boolean(PagerView && containerWidth > 0 && Platform.OS === 'ios');
-  const useScrollGap = !usePagerView && containerWidth > 0;
-  const resolvedPageWidth = containerWidth > 0 ? pageWidth : undefined;
 
   const pages = (
     <>
